@@ -76,6 +76,7 @@ export class CanvasEngine {
         
         // 2. Draw Scene Graph
         sceneGraph.assets.forEach(asset => {
+            if (!asset.visible) return;
             const t = { ...this.transform, isSelected: sceneGraph.selectedAssetIds.has(asset.id) };
             asset.render(this.ctx, t);
         });

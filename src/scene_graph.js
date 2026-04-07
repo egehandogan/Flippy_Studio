@@ -13,6 +13,12 @@ export class FlippyAsset {
         this.height = properties.height || 100;
         this.scale = properties.scale || { x: 1, y: 1 };
         this.rotation = properties.rotation || 0;
+        this.name = properties.name || `${type.charAt(0).toUpperCase() + type.slice(1)} ${Math.floor(Math.random() * 1000)}`;
+        this.layerType = properties.layerType || 'basic'; // 'frame', 'component', 'group', 'autolayout', 'basic'
+        this.visible = properties.visible !== undefined ? properties.visible : true;
+        this.locked = properties.locked || false;
+        this.parentId = properties.parentId || null;
+        
         this.properties = {
             fill: properties.fill || '#FFFFFF',
             stroke: properties.stroke || '#0094FF',
@@ -183,7 +189,12 @@ export class FlippyAsset {
             scale: { ...this.scale },
             rotation: this.rotation,
             properties: { ...this.properties },
-            engineMetadata: { ...this.engineMetadata }
+            engineMetadata: { ...this.engineMetadata },
+            name: this.name,
+            layerType: this.layerType,
+            visible: this.visible,
+            locked: this.locked,
+            parentId: this.parentId
         };
     }
 
@@ -195,6 +206,11 @@ export class FlippyAsset {
         asset.scale = { ...data.scale };
         asset.rotation = data.rotation;
         asset.engineMetadata = { ...data.engineMetadata };
+        asset.name = data.name;
+        asset.layerType = data.layerType;
+        asset.visible = data.visible;
+        asset.locked = data.locked;
+        asset.parentId = data.parentId;
         return asset;
     }
 
@@ -219,13 +235,22 @@ export class SceneGraph {
     }
 
     removeAsset(id) {
-        this.assets = this.assets.filter(a => a.id !== id);
+        this.assets = this.assets.filter(a => a.id !== id && a.parentId !== id); // Also remove children basically
+    }
+
+    reorderAsset(id, newIndex) {
+        const index = this.assets.findIndex(a => a.id === id);
+        if (index > -1) {
+            const [asset] = this.assets.splice(index, 1);
+            this.assets.splice(newIndex, 0, asset);
+        }
     }
 
     getAssetAt(x, y, transform) {
         // Simple hit detection (reverse order for top-most)
         for (let i = this.assets.length - 1; i >= 0; i--) {
             const asset = this.assets[i];
+            if (!asset.visible || asset.locked) continue;
             
             // Check handles first
             const handle = asset.getHandleAt(x, y, transform);
@@ -259,6 +284,7 @@ export class SceneGraph {
         const maxY = Math.max(y1, y2);
 
         return this.assets.filter(asset => {
+            if (!asset.visible || asset.locked) return false;
             const ax = asset.x * transform.scale + transform.x;
             const ay = asset.y * transform.scale + transform.y;
             const aw = asset.width * transform.scale;

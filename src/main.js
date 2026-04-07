@@ -2,6 +2,7 @@ import './style.css'
 import { CanvasEngine } from './canvas_engine'
 import { SceneGraph, FlippyAsset } from './scene_graph'
 import { FloatingToolbar } from './toolbar'
+import { LayersPanel } from './layers_panel'
 
 const sceneGraph = new SceneGraph();
 const engine = new CanvasEngine('flippy-canvas');
@@ -12,6 +13,7 @@ class HistoryManager {
         this.sceneGraph = sceneGraph;
         this.limit = limit;
         this.undoStack = [];
+        this.onStateChange = null;
         this.saveState(); // Initial state
     }
 
@@ -20,6 +22,7 @@ class HistoryManager {
             this.undoStack.shift(); // Remove oldest
         }
         this.undoStack.push(JSON.stringify(this.sceneGraph.serialize()));
+        if (this.onStateChange) this.onStateChange();
     }
 
     undo() {
@@ -28,6 +31,7 @@ class HistoryManager {
             const previousState = this.undoStack[this.undoStack.length - 1];
             this.sceneGraph.deserialize(JSON.parse(previousState));
             this.sceneGraph.selectedAssetIds.clear(); // Clear selection on undo
+            if (this.onStateChange) this.onStateChange();
         }
     }
 }
@@ -71,6 +75,12 @@ class ClipboardManager {
 
 const historyManager = new HistoryManager(sceneGraph);
 const clipboardManager = new ClipboardManager(sceneGraph);
+
+const layersPanel = new LayersPanel('.layers-panel', sceneGraph, (saveHistory) => {
+    if (saveHistory) historyManager.saveState();
+});
+
+historyManager.onStateChange = () => layersPanel.render();
 
 let activeTool = 'cursor';
 let interactionMode = 'none'; // 'moving', 'resizing', 'rotating', 'drawing', 'marquee'
@@ -185,6 +195,7 @@ engine.canvas.addEventListener('mousedown', (e) => {
         comment.focus();
         comment.onblur = () => { if(!comment.textContent) comment.remove(); };
     }
+    layersPanel.render();
 });
 
 window.addEventListener('mousemove', (e) => {
@@ -297,6 +308,8 @@ window.addEventListener('mouseup', () => {
     engine.draggedAsset = null;
     activeHandle = null;
     marquee.style.display = 'none';
+    
+    layersPanel.render();
 });
 
 // Global Shortcuts
@@ -327,12 +340,14 @@ window.addEventListener('keydown', (e) => {
             sceneGraph.selectedAssetIds.forEach(id => sceneGraph.removeAsset(id));
             sceneGraph.selectedAssetIds.clear();
             historyManager.saveState();
+            layersPanel.render();
         }
     }
 
     if (key === 'Escape') {
         toolbar.setActiveTool('cursor');
         sceneGraph.selectedAssetIds.clear();
+        layersPanel.render();
         return;
     }
 
