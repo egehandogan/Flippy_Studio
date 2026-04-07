@@ -20,11 +20,12 @@ export class FlippyAsset {
         this.parentId = properties.parentId || null;
         
         this.properties = {
-            fill: properties.fill || '#FFFFFF',
-            stroke: properties.stroke || '#0094FF',
+            fill: properties.fill || (type === 'frame' ? '#FFFFFF' : '#FFFFFF'),
+            stroke: properties.stroke || (type === 'frame' ? 'transparent' : '#0094FF'),
             strokeWidth: properties.strokeWidth || 1,
             content: properties.content || '',
             src: properties.src || null,
+            clipContent: properties.clipContent !== undefined ? properties.clipContent : (type === 'frame' ? true : false),
             ...properties
         };
         
@@ -36,7 +37,7 @@ export class FlippyAsset {
         };
     }
 
-    render(ctx, transform) {
+    render(ctx, transform, sceneGraph) {
         ctx.save();
         
         const scale = transform.scale;
@@ -55,6 +56,23 @@ export class FlippyAsset {
         const ry = -th/2;
 
         switch (this.type) {
+            case 'frame':
+                ctx.fillStyle = this.properties.fill;
+                if (this.properties.strokeWidth && this.properties.stroke !== 'transparent') {
+                    ctx.strokeStyle = this.properties.stroke;
+                    ctx.lineWidth = this.properties.strokeWidth;
+                }
+                ctx.beginPath();
+                ctx.rect(rx, ry, tw, th);
+                ctx.fill();
+                if (this.properties.strokeWidth && this.properties.stroke !== 'transparent') ctx.stroke();
+                
+                // Draw Frame Name
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.font = `${12 * scale}px Inter`;
+                ctx.textAlign = 'left';
+                ctx.fillText(this.name, rx, ry - (6 * scale));
+                break;
             case 'rect':
                 ctx.fillStyle = this.properties.fill;
                 ctx.strokeStyle = this.properties.stroke;
@@ -87,6 +105,29 @@ export class FlippyAsset {
         }
 
         ctx.restore();
+
+        // Draw children recursive
+        if (sceneGraph) {
+            const children = sceneGraph.assets.filter(a => a.parentId === this.id);
+            if (children.length > 0) {
+                ctx.save();
+                if (this.type === 'frame' && this.properties.clipContent) {
+                     ctx.translate(cx, cy);
+                     ctx.rotate(this.rotation);
+                     ctx.beginPath();
+                     ctx.rect(rx, ry, tw, th);
+                     ctx.clip(); 
+                     ctx.rotate(-this.rotation);
+                     ctx.translate(-cx, -cy);
+                }
+                children.forEach(child => {
+                     if (!child.visible) return;
+                     const t = { ...transform, isSelected: sceneGraph.selectedAssetIds.has(child.id) };
+                     child.render(ctx, t, sceneGraph);
+                });
+                ctx.restore();
+            }
+        }
 
         // If selected, draw bounding box and handles
         if (transform.isSelected) {

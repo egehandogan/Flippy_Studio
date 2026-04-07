@@ -179,7 +179,7 @@ engine.canvas.addEventListener('mousedown', (e) => {
             marquee.style.width = '0px';
             marquee.style.height = '0px';
         }
-    } else if (activeTool === 'rect' || activeTool === 'circle') {
+    } else if (activeTool === 'rect' || activeTool === 'circle' || activeTool === 'frame') {
         interactionMode = 'drawing';
         const asset = new FlippyAsset(activeTool, worldStart.x, worldStart.y, { width: 1, height: 1 });
         currentAssetId = sceneGraph.addAsset(asset);
@@ -225,8 +225,20 @@ window.addEventListener('mousemove', (e) => {
             if (dx > dy) ny = worldStart.y + engine.dragStartOffset.y;
             else nx = worldStart.x + engine.dragStartOffset.x;
         }
-        asset.x = nx;
-        asset.y = ny;
+        
+        const deltaX = nx - asset.x;
+        const deltaY = ny - asset.y;
+        
+        // Recursive move for children
+        const moveRecursively = (target, dX, dY) => {
+            target.x += dX;
+            target.y += dY;
+            sceneGraph.assets.filter(a => a.parentId === target.id).forEach(child => {
+                moveRecursively(child, dX, dY);
+            });
+        };
+        
+        moveRecursively(asset, deltaX, deltaY);
     } else if (interactionMode === 'drawing' && currentAssetId) {
         const asset = sceneGraph.assets.find(a => a.id === currentAssetId);
         const worldStart = engine.getMouseInWorldSpace(startPos.x, startPos.y);
@@ -297,6 +309,30 @@ window.addEventListener('mouseup', () => {
     const isNewDraw = interactionMode === 'drawing';
 
     if (isActivity) {
+        // Auto-parenting evaluation
+        if ((interactionMode === 'moving' && engine.draggedAsset) || (interactionMode === 'drawing' && currentAssetId)) {
+            const assetTarget = engine.draggedAsset || sceneGraph.assets.find(a => a.id === currentAssetId);
+            if (assetTarget && assetTarget.type !== 'frame') {
+                const cx = assetTarget.x + assetTarget.width / 2;
+                const cy = assetTarget.y + assetTarget.height / 2;
+                
+                let foundFrame = null;
+                for (let i = sceneGraph.assets.length - 1; i >= 0; i--) {
+                    const f = sceneGraph.assets[i];
+                    if (f.type === 'frame' && f.id !== assetTarget.id && !f.locked && f.visible) {
+                        if (cx >= f.x && cx <= f.x + f.width && cy >= f.y && cy <= f.y + f.height) {
+                            foundFrame = f;
+                            break;
+                        }
+                    }
+                }
+                if (foundFrame && assetTarget.parentId !== foundFrame.id) {
+                    assetTarget.parentId = foundFrame.id;
+                } else if (!foundFrame && assetTarget.parentId !== null) {
+                    assetTarget.parentId = null;
+                }
+            }
+        }
         historyManager.saveState();
     }
     if (isNewDraw) {
@@ -352,7 +388,7 @@ window.addEventListener('keydown', (e) => {
     }
 
     const toolMap = {
-        'v': 'cursor', 'r': 'rect', 'o': 'circle', 't': 'text', 'p': 'pen', 'c': 'comment', 'i': 'import', 'a': 'ai', 'x': 'center'
+        'v': 'cursor', 'r': 'rect', 'o': 'circle', 't': 'text', 'p': 'pen', 'c': 'comment', 'i': 'import', 'a': 'ai', 'x': 'center', 'f': 'frame'
     };
 
     if (toolMap[toolKey]) {

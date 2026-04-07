@@ -75,10 +75,11 @@ export class CanvasEngine {
         this.drawGrid();
         
         // 2. Draw Scene Graph
-        sceneGraph.assets.forEach(asset => {
+        const rootAssets = sceneGraph.assets.filter(a => !a.parentId);
+        rootAssets.forEach(asset => {
             if (!asset.visible) return;
             const t = { ...this.transform, isSelected: sceneGraph.selectedAssetIds.has(asset.id) };
-            asset.render(this.ctx, t);
+            asset.render(this.ctx, t, sceneGraph);
         });
         
         requestAnimationFrame(() => this.draw(sceneGraph));
