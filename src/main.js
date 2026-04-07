@@ -3,6 +3,7 @@ import { CanvasEngine } from './canvas_engine'
 import { SceneGraph, FlippyAsset } from './scene_graph'
 import { FloatingToolbar } from './toolbar'
 import { LayersPanel } from './layers_panel'
+import { PropertiesPanel } from './properties_panel'
 
 const sceneGraph = new SceneGraph();
 const engine = new CanvasEngine('flippy-canvas');
@@ -80,7 +81,14 @@ const layersPanel = new LayersPanel('.layers-panel', sceneGraph, (saveHistory) =
     if (saveHistory) historyManager.saveState();
 });
 
-historyManager.onStateChange = () => layersPanel.render();
+const propertiesPanel = new PropertiesPanel('.properties-panel', sceneGraph, (saveHistory) => {
+    if (saveHistory) historyManager.saveState();
+});
+
+historyManager.onStateChange = () => { 
+    layersPanel.render(); 
+    propertiesPanel.render(); 
+};
 
 let activeTool = 'cursor';
 let interactionMode = 'none'; // 'moving', 'resizing', 'rotating', 'drawing', 'marquee'
@@ -196,6 +204,7 @@ engine.canvas.addEventListener('mousedown', (e) => {
         comment.onblur = () => { if(!comment.textContent) comment.remove(); };
     }
     layersPanel.render();
+    propertiesPanel.render();
 });
 
 window.addEventListener('mousemove', (e) => {
@@ -346,6 +355,7 @@ window.addEventListener('mouseup', () => {
     marquee.style.display = 'none';
     
     layersPanel.render();
+    propertiesPanel.render();
 });
 
 // Global Shortcuts
@@ -377,6 +387,7 @@ window.addEventListener('keydown', (e) => {
             sceneGraph.selectedAssetIds.clear();
             historyManager.saveState();
             layersPanel.render();
+            propertiesPanel.render();
         }
     }
 
@@ -384,6 +395,7 @@ window.addEventListener('keydown', (e) => {
         toolbar.setActiveTool('cursor');
         sceneGraph.selectedAssetIds.clear();
         layersPanel.render();
+        propertiesPanel.render();
         return;
     }
 
