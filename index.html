@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flippy Studio | Design-to-Engine</title>
+    <!-- Premium Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="flippy-canvas"></canvas>
+      
+      <!-- UI Layout -->
+      <div id="top-bar"></div>
+
+      <div id="left-sidebar">
+        <div class="panel engine-panel">
+            <div class="panel-header">Game Engine Editor</div>
+            <div class="engine-buttons">
+                <!-- Unity -->
+                <div class="engine-card">
+                    <div class="engine-sync-status"><span class="status-dot empty"></span> Live Sync <span class="radio"></span></div>
+                    <div class="engine-logo"><img src="/unity_logo.png" style="width: 24px; height: 24px; object-fit: contain;"></div>
+                    <div class="engine-label">Unity</div>
+                </div>
+                <!-- Unreal -->
+                <div class="engine-card">
+                    <div class="engine-sync-status"><span class="status-dot empty"></span> Live Sync <span class="radio"></span></div>
+                    <div class="engine-logo"><img src="/unreal_logo.png" style="width: 24px; height: 24px; object-fit: contain;"></div>
+                    <div class="engine-label">Unreal</div>
+                </div>
+                <!-- Godot -->
+                <div class="engine-card">
+                    <div class="engine-sync-status"><span class="status-dot empty"></span> Live Sync <span class="radio"></span></div>
+                    <div class="engine-logo"><img src="/godot_logo.png" style="width: 24px; height: 24px; object-fit: contain;"></div>
+                    <div class="engine-label">Godot</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel layers-panel">
+            <div class="panel-header flex-between">
+                <span>Layers</span>
+                <span class="header-actions">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                </span>
+            </div>
+        </div>
+      </div>
+
+      <div id="right-sidebar">
+        <div class="panel properties-panel"></div>
+      </div>
+
+      <!-- Overlays -->
+      <div id="toolbar-container"></div>
+      <div id="overlay-layer"></div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
