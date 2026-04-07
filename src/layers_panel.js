@@ -25,61 +25,59 @@ export class LayersPanel {
     render() {
         this.listContainer.innerHTML = '';
         
-        // Reverse order: UI shows front-most (last in array) at the top.
-        const assetsUiList = [...this.sceneGraph.assets].reverse();
-
-        assetsUiList.forEach((asset) => {
-            const item = document.createElement('div');
-            item.className = `layer-item layer-type-${asset.layerType} ${this.sceneGraph.selectedAssetIds.has(asset.id) ? 'selected' : ''}`;
-            item.dataset.id = asset.id;
-            item.draggable = true;
-
-            let typeIcon = '';
-            if (asset.layerType === 'frame') typeIcon = `<svg viewBox="0 0 24 24"><path d="M4 8h16M4 16h16M8 4v16M16 4v16" stroke="currentColor" stroke-width="2" fill="none"/></svg>`;
-            else if (asset.layerType === 'component') typeIcon = `<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" transform="rotate(45 12 12)" stroke="currentColor" stroke-width="2" fill="none"/></svg>`;
-            else if (asset.layerType === 'group') typeIcon = `<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4" fill="none"/></svg>`;
-            else if (asset.layerType === 'auto-layout') typeIcon = `<svg viewBox="0 0 24 24"><path d="M8 6v12M16 6v12M12 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
-            else typeIcon = `<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>`;
-            
-            const depth = this.calculateDepth(asset.id);
-            const indentStyle = depth > 0 ? `padding-left: ${depth * 16}px` : '';
-
-            // Using pure CSS visibility/opacity for hover lock/eye unless they are active
-            item.innerHTML = `
-                <div class="layer-content" style="${indentStyle}">
-                    <span class="layer-collapse">
-                        ${depth === 0 ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>` : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>`}
-                    </span>
-                    <span class="layer-icon">${typeIcon}</span>
-                    <span class="layer-name">${asset.name}</span>
-                </div>
-                <div class="layer-actions">
-                    <span class="layer-lock ${asset.locked ? 'active' : ''}" data-action="lock" title="Lock">
-                        ${asset.locked ? 
-                            `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>` : 
-                            `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`}
-                    </span>
-                    <span class="layer-visible ${!asset.visible ? 'active' : ''}" data-action="visible" title="Toggle Visibility">
-                        ${asset.visible ? 
-                            `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>` :
-                            `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22"/></svg>`
-                        }
-                    </span>
-                </div>
-            `;
-            
-            this.listContainer.appendChild(item);
+        // Get root assets (no parentId) and reverse so top UI representation aligns with Z-order front
+        const rootAssets = this.sceneGraph.assets.filter(a => !a.parentId).reverse();
+        
+        rootAssets.forEach(root => {
+            this.renderAssetNode(root, 0);
         });
     }
 
-    calculateDepth(id) {
-        let depth = 0;
-        let pId = this.sceneGraph.assets.find(a => a.id === id)?.parentId;
-        while(pId) {
-            depth++;
-            pId = this.sceneGraph.assets.find(a => a.id === pId)?.parentId;
-        }
-        return depth;
+    renderAssetNode(asset, depth) {
+        const item = document.createElement('div');
+        item.className = `layer-item layer-type-${asset.layerType} ${this.sceneGraph.selectedAssetIds.has(asset.id) ? 'selected' : ''}`;
+        item.dataset.id = asset.id;
+        item.draggable = true;
+
+        let typeIcon = '';
+        if (asset.layerType === 'frame') typeIcon = `<svg viewBox="0 0 24 24"><path d="M4 8h16M4 16h16M8 4v16M16 4v16" stroke="currentColor" stroke-width="2" fill="none"/></svg>`;
+        else if (asset.layerType === 'component') typeIcon = `<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" transform="rotate(45 12 12)" stroke="currentColor" stroke-width="2" fill="none"/></svg>`;
+        else if (asset.layerType === 'group') typeIcon = `<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4" fill="none"/></svg>`;
+        else if (asset.layerType === 'auto-layout') typeIcon = `<svg viewBox="0 0 24 24"><path d="M8 6v12M16 6v12M12 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+        else typeIcon = `<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>`;
+        
+        const indentStyle = depth > 0 ? `padding-left: ${depth * 16}px` : '';
+
+        item.innerHTML = `
+            <div class="layer-content" style="${indentStyle}">
+                <span class="layer-collapse">
+                    ${depth === 0 ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>` : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>`}
+                </span>
+                <span class="layer-icon">${typeIcon}</span>
+                <span class="layer-name">${asset.name}</span>
+            </div>
+            <div class="layer-actions">
+                <span class="layer-lock ${asset.locked ? 'active' : ''}" data-action="lock" title="Lock">
+                    ${asset.locked ? 
+                        `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>` : 
+                        `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`}
+                </span>
+                <span class="layer-visible ${!asset.visible ? 'active' : ''}" data-action="visible" title="Toggle Visibility">
+                    ${asset.visible ? 
+                        `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>` :
+                        `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22"/></svg>`
+                    }
+                </span>
+            </div>
+        `;
+        
+        this.listContainer.appendChild(item);
+
+        // Recursive call for nested children
+        const children = this.sceneGraph.assets.filter(a => a.parentId === asset.id).reverse();
+        children.forEach(child => {
+            this.renderAssetNode(child, depth + 1);
+        });
     }
 
     bindEvents() {
