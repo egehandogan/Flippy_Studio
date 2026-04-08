@@ -9,8 +9,6 @@ export class PropertiesPanel {
         this.container.innerHTML = `
             <div class="panel-header tabbed-header">
                 <div class="tab active">Design</div>
-                <div class="tab">Prototype</div>
-                <div class="tab">Inspect</div>
             </div>
             <div class="props-content" id="props-content"></div>
         `;
@@ -219,7 +217,7 @@ export class PropertiesPanel {
                                 <span class="pct-symbol">%</span>
                             </div>
                         </div>
-                        <button class="icon-btn tooltip sm" title="Toggle visibility" style="margin-left: 8px;">
+                        <button class="icon-btn tooltip sm" data-action="toggle-visible" title="Toggle visibility" style="margin-left: 8px;">
                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                         <button class="icon-btn text-like ml-8" data-action="remove-stroke">-</button>
@@ -252,7 +250,7 @@ export class PropertiesPanel {
                                 <span class="pct-symbol">%</span>
                             </div>
                         </div>
-                        <button class="icon-btn tooltip sm" title="Toggle visibility" style="margin-left: 8px;">
+                        <button class="icon-btn tooltip sm" data-action="toggle-visible" title="Toggle visibility" style="margin-left: 8px;">
                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                         <button class="icon-btn text-like ml-8" data-action="remove-stroke">-</button>
@@ -312,9 +310,12 @@ export class PropertiesPanel {
         });
 
         this.container.addEventListener('input', (e) => {
-            // Colors update continuously on sliding
+            // Numbers and Colors update continuously while dragging or typing
+            if (e.target.matches('input[type="number"][data-prop]')) {
+                this.updateAssetFromInput(e.target, false); // Don't save history on every frame of drag
+            }
             if (e.target.matches('input[type="color"][data-prop]') || e.target.matches('input[type="color"][data-global-prop]')) {
-                this.updateAssetFromInput(e.target, false); // Don't save history on every drag frame
+                this.updateAssetFromInput(e.target, false); 
             }
         });
 
