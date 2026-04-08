@@ -1,3 +1,5 @@
+import { ColorPicker } from './color_picker.js';
+
 export class PropertiesPanel {
     constructor(containerSelector, sceneGraph, onUiChange) {
         this.container = document.querySelector(containerSelector);
@@ -29,10 +31,9 @@ export class PropertiesPanel {
                     </div>
                     <div class="flex-between">
                         <div class="compound-input-container">
-                            <label class="color-swatch-label">
+                            <div class="color-swatch-label" data-color-action="pageColor" data-current="${pageHex}" data-opacity="100">
                                 <div class="color-swatch" style="background-color: ${pageHex}"></div>
-                                <input type="color" class="hidden-color-picker" data-global-prop="pageColor" value="${pageHex}">
-                            </label>
+                            </div>
                             <input type="text" class="prop-input hex-input" data-global-prop="pageColor" value="${pageHex.toUpperCase().replace('#', '')}">
                             <div class="vertical-divider"></div>
                             <div class="flex-row">
@@ -194,10 +195,9 @@ export class PropertiesPanel {
                 </div>
                 <div class="flex-between fill-row">
                     <div class="compound-input-container">
-                        <label class="color-swatch-label">
+                        <div class="color-swatch-label" data-color-action="properties.fill" data-current="${fillHex}" data-opacity="${asset.properties.fillOpacity !== undefined ? asset.properties.fillOpacity : 100}">
                             <div class="color-swatch" style="background-color: ${fillHex}"></div>
-                            <input type="color" class="hidden-color-picker" data-prop="properties.fill" value="${fillHex}">
-                        </label>
+                        </div>
                         <input type="text" class="prop-input hex-input" data-prop="properties.fill" value="${fillHex.toUpperCase().replace('#', '')}">
                         <div class="vertical-divider"></div>
                         <div class="flex-row">
@@ -226,10 +226,9 @@ export class PropertiesPanel {
                 ${hasStroke ? `
                 <div class="flex-between fill-row mb-8">
                     <div class="compound-input-container">
-                        <label class="color-swatch-label">
+                        <div class="color-swatch-label" data-color-action="properties.stroke" data-current="${strokeHex}" data-opacity="${asset.properties.strokeOpacity !== undefined ? asset.properties.strokeOpacity : 100}">
                             <div class="color-swatch" style="background-color: ${strokeHex}"></div>
-                            <input type="color" class="hidden-color-picker" data-prop="properties.stroke" value="${strokeHex}">
-                        </label>
+                        </div>
                         <input type="text" class="prop-input hex-input" data-prop="properties.stroke" value="${strokeHex.toUpperCase().replace('#', '')}">
                         <div class="vertical-divider"></div>
                         <div class="flex-row">
@@ -304,6 +303,24 @@ export class PropertiesPanel {
 
         // Buttons
         this.container.addEventListener('click', (e) => {
+            const swatch = e.target.closest('.color-swatch-label');
+            if (swatch) {
+                const rect = swatch.getBoundingClientRect();
+                const propPath = swatch.dataset.colorAction;
+                
+                ColorPicker.open({
+                    x: rect.right + 10,
+                    y: rect.top,
+                    hex: swatch.dataset.current,
+                    opacity: parseInt(swatch.dataset.opacity) || 100,
+                    sceneGraph: this.sceneGraph,
+                    onChange: (hex, opacity) => {
+                        this.applyColorChangeFromPicker(propPath, hex, opacity);
+                    }
+                });
+                return;
+            }
+
             const btn = e.target.closest('[data-action]');
             if (!btn) return;
             const action = btn.dataset.action;
@@ -406,6 +423,29 @@ export class PropertiesPanel {
 
         // Re-render to format text correctly (e.g. Hex adding #) if we blurred
         if (saveHistory) this.render();
+    }
+
+    applyColorChangeFromPicker(propPath, hex, opacity) {
+        if (propPath === 'pageColor') {
+            this.sceneGraph.pageColor = hex;
+        } else {
+            const selectedIds = Array.from(this.sceneGraph.selectedAssetIds);
+            selectedIds.forEach(id => {
+                const asset = this.sceneGraph.assets.find(a => a.id === id);
+                if (!asset) return;
+                
+                if (propPath === 'properties.fill') {
+                    asset.properties.fill = hex;
+                    asset.properties.fillOpacity = opacity;
+                } else if (propPath === 'properties.stroke') {
+                    asset.properties.stroke = hex;
+                    asset.properties.strokeOpacity = opacity;
+                }
+            });
+        }
+        
+        this.render();
+        this.onUiChange(false); // Live canvas visual update without immediately bloating history
     }
 
     ensureHex(val) {
