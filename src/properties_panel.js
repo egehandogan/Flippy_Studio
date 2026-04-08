@@ -15,6 +15,51 @@ export class PropertiesPanel {
         this.content = document.getElementById('props-content');
         
         this.bindEvents();
+        this._bindScrub();
+    }
+
+    // ── Label scrub: click+drag on a .prop-label to change its sibling input ──
+    _bindScrub() {
+        let scrubStart = null, scrubLabel = null, scrubInput = null, baseVal = 0;
+
+        this.container.addEventListener('pointerdown', (e) => {
+            const label = e.target.closest('.prop-label');
+            if (!label) return;
+            const group = label.closest('.prop-input-group');
+            if (!group) return;
+            const input = group.querySelector('input[data-prop]');
+            if (!input || input.type === 'text') return;
+
+            label.setPointerCapture(e.pointerId);
+            label.classList.add('scrubbing');
+
+            scrubLabel = label;
+            scrubInput = input;
+            scrubStart = e.clientX;
+            baseVal    = parseFloat(input.value) || 0;
+
+            e.preventDefault();
+        });
+
+        this.container.addEventListener('pointermove', (e) => {
+            if (!scrubLabel || !scrubInput) return;
+            const delta = (e.clientX - scrubStart) * (e.shiftKey ? 10 : 1);
+            const step  = parseFloat(scrubInput.step) || 1;
+            const raw   = baseVal + delta * step;
+            const min   = scrubInput.min !== '' ? parseFloat(scrubInput.min) : -Infinity;
+            const max   = scrubInput.max !== '' ? parseFloat(scrubInput.max) :  Infinity;
+            const val   = Math.max(min, Math.min(max, Math.round(raw)));
+
+            scrubInput.value = val;
+            this.updateAssetFromInput(scrubInput, false);
+        });
+
+        this.container.addEventListener('pointerup', () => {
+            if (!scrubLabel) return;
+            scrubLabel.classList.remove('scrubbing');
+            if (scrubInput) this.updateAssetFromInput(scrubInput, true);
+            scrubLabel = null; scrubInput = null; scrubStart = null;
+        });
     }
 
     render() {
