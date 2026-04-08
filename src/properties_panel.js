@@ -172,7 +172,8 @@ export class PropertiesPanel {
                         <input type="color" class="color-picker-input" data-prop="properties.fill" value="${fillHex}">
                     </div>
                     <input type="text" class="prop-input hex-input" data-prop="properties.fill" value="${fillHex.toUpperCase().replace('#', '')}">
-                    <input type="text" class="prop-input small-pct" value="100%" disabled>
+                    <input type="number" class="prop-input small-pct" data-prop="properties.fillOpacity" value="${asset.properties.fillOpacity !== undefined ? asset.properties.fillOpacity : 100}" min="0" max="100">
+                    <span style="font-size:10px; color:rgba(255,255,255,0.4);">%</span>
                     <button class="icon-btn text-like">-</button>
                 </div>
             </div>
@@ -195,20 +196,45 @@ export class PropertiesPanel {
                         <input type="color" class="color-picker-input" data-prop="properties.stroke" value="${strokeHex}">
                     </div>
                     <input type="text" class="prop-input hex-input" data-prop="properties.stroke" value="${strokeHex.toUpperCase().replace('#', '')}">
-                    <input type="text" class="prop-input small-pct" value="100%" disabled>
+                    <input type="number" class="prop-input small-pct" data-prop="properties.strokeOpacity" value="${asset.properties.strokeOpacity !== undefined ? asset.properties.strokeOpacity : 100}" min="0" max="100">
+                    <span style="font-size:10px; color:rgba(255,255,255,0.4);">%</span>
                     <button class="icon-btn text-like" data-action="remove-stroke">-</button>
                 </div>
                 <div class="flex-row">
                     <div class="prop-input-group small" style="width: 40px;">
                         <input type="number" class="prop-input" data-prop="properties.strokeWidth" value="${asset.properties.strokeWidth}">
                     </div>
-                    <div class="prop-dropdown dark-dropdown flex-grow ml-8"><span style="font-size:10px;">Inside</span></div>
+                    <div class="prop-dropdown dark-dropdown flex-grow ml-8" data-action="cycle-stroke-pos">
+                         <span style="font-size:10px; text-transform:capitalize;">${asset.properties.strokePosition || 'inside'}</span>
+                    </div>
                 </div>` : ''}
             </div>
             <div class="prop-divider"></div>
         `;
 
-        this.content.innerHTML = alignHtml + spatialHtml + constraintsHtml + layerHtml + textHtml + fillHtml + strokeHtml;
+        // Extracs placeholders
+        const extrasHtml = `
+            <div class="prop-section">
+                <div class="flex-between section-title-row">
+                    <span class="section-title">Effects</span>
+                    <div class="actions">
+                        <button class="icon-btn text-like">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="prop-divider"></div>
+            <div class="prop-section">
+                <div class="flex-between section-title-row">
+                    <span class="section-title">Export</span>
+                    <div class="actions">
+                        <button class="icon-btn text-like">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="prop-divider"></div>
+        `;
+
+        this.content.innerHTML = alignHtml + spatialHtml + constraintsHtml + layerHtml + textHtml + fillHtml + strokeHtml + extrasHtml;
     }
 
     bindEvents() {
@@ -255,6 +281,13 @@ export class PropertiesPanel {
                 this.onUiChange(true);
             } else if (action === 'remove-stroke') {
                 asset.properties.stroke = 'transparent';
+                this.render();
+                this.onUiChange(true);
+            } else if (action === 'cycle-stroke-pos') {
+                const pos = asset.properties.strokePosition || 'inside';
+                if (pos === 'inside') asset.properties.strokePosition = 'center';
+                else if (pos === 'center') asset.properties.strokePosition = 'outside';
+                else asset.properties.strokePosition = 'inside';
                 this.render();
                 this.onUiChange(true);
             }

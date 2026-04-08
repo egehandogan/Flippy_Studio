@@ -505,14 +505,14 @@ canvas {
 
 .layer-lock, .layer-visible {
     opacity: 0;
-    pointer-events: none;
+    visibility: hidden;
     transition: opacity 0.1s;
     cursor: pointer;
 }
 
 .layer-item:hover .layer-lock, .layer-item:hover .layer-visible {
     opacity: 1;
-    pointer-events: auto;
+    visibility: visible;
 }
 
 .layer-lock:hover, .layer-visible:hover { color: white; }
@@ -520,7 +520,7 @@ canvas {
 /* Always visible if active (State overrides) */
 .layer-lock.active, .layer-visible.active {
     opacity: 1;
-    pointer-events: auto;
+    visibility: visible;
     color: white;
 }
 
@@ -687,6 +687,7 @@ canvas {
 /* Alignment matrix */
 .align-bar {
     display: flex;
+    flex-direction: row !important;
     justify-content: space-between;
     align-items: center;
     color: rgba(255, 255, 255, 0.6);

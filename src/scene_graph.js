@@ -21,8 +21,11 @@ export class FlippyAsset {
         
         this.properties = {
             fill: properties.fill || (type === 'frame' ? '#FFFFFF' : '#FFFFFF'),
+            fillOpacity: properties.fillOpacity !== undefined ? properties.fillOpacity : 100,
             stroke: properties.stroke || (type === 'frame' ? 'transparent' : '#0094FF'),
             strokeWidth: properties.strokeWidth || 1,
+            strokeOpacity: properties.strokeOpacity !== undefined ? properties.strokeOpacity : 100,
+            strokePosition: properties.strokePosition || 'inside', // 'inside', 'center', 'outside'
             content: properties.content || '',
             src: properties.src || null,
             clipContent: properties.clipContent !== undefined ? properties.clipContent : (type === 'frame' ? true : false),
@@ -57,30 +60,41 @@ export class FlippyAsset {
 
         switch (this.type) {
             case 'frame':
+            case 'rect':
                 ctx.fillStyle = this.properties.fill;
+                ctx.beginPath();
+                ctx.rect(rx, ry, tw, th);
+                ctx.globalAlpha = (this.properties.fillOpacity !== undefined ? this.properties.fillOpacity : 100) / 100;
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+                
                 if (this.properties.strokeWidth && this.properties.stroke !== 'transparent') {
                     ctx.strokeStyle = this.properties.stroke;
                     ctx.lineWidth = this.properties.strokeWidth;
+                    ctx.globalAlpha = (this.properties.strokeOpacity !== undefined ? this.properties.strokeOpacity : 100) / 100;
+                    
+                    const pos = this.properties.strokePosition || 'inside';
+                    ctx.beginPath();
+                    if (pos === 'inside') {
+                         const i = this.properties.strokeWidth / 2;
+                         ctx.rect(rx + i, ry + i, tw - i * 2, th - i * 2);
+                    } else if (pos === 'outside') {
+                         const o = this.properties.strokeWidth / 2;
+                         ctx.rect(rx - o, ry - o, tw + o * 2, th + o * 2);
+                    } else { // center
+                         ctx.rect(rx, ry, tw, th);
+                    }
+                    ctx.stroke();
                 }
-                ctx.beginPath();
-                ctx.rect(rx, ry, tw, th);
-                ctx.fill();
-                if (this.properties.strokeWidth && this.properties.stroke !== 'transparent') ctx.stroke();
+                ctx.globalAlpha = 1.0;
                 
-                // Draw Frame Name
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                ctx.font = `${12 * scale}px Inter`;
-                ctx.textAlign = 'left';
-                ctx.fillText(this.name, rx, ry - (6 * scale));
-                break;
-            case 'rect':
-                ctx.fillStyle = this.properties.fill;
-                ctx.strokeStyle = this.properties.stroke;
-                ctx.lineWidth = this.properties.strokeWidth;
-                ctx.beginPath();
-                ctx.rect(rx, ry, tw, th);
-                ctx.fill();
-                ctx.stroke();
+                if (this.type === 'frame') {
+                    // Draw Frame Name
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.font = `${12 * scale}px Inter`;
+                    ctx.textAlign = 'left';
+                    ctx.fillText(this.name, rx, ry - (6 * scale));
+                }
                 break;
             case 'circle':
                 ctx.fillStyle = this.properties.fill;
