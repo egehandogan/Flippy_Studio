@@ -780,3 +780,13 @@ canvas {
 .cp-gallery-header { display: flex; justify-content: space-between; align-items: center; font-size: 11px; margin-bottom: 8px; cursor: pointer; color: rgba(255, 255, 255, 0.8);}
 .cp-swatch-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
 .cp-grid-swatch { width: 100%; aspect-ratio: 1; border-radius: 4px; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1); }
+
+/* Properties Accordion & Tabs */
+.tabbed-header { display: flex; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding: 0 16px; margin: 0 -16px; }
+.tabbed-header .tab { padding: 12px 16px; cursor: pointer; color: rgba(255, 255, 255, 0.5); font-size: 11px; font-weight: 500; border-bottom: 2px solid transparent; }
+.tabbed-header .tab.active { color: white; border-bottom-color: white; font-weight: 600; }
+.prop-accordion summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+.prop-accordion summary::-webkit-details-marker { display: none; }
+.prop-accordion summary .section-title::before { content: '›'; display: inline-block; margin-right: 6px; font-size: 14px; font-weight: bold; transform: translateY(-1px); transition: transform 0.1s; }
+.prop-accordion[open] summary .section-title::before { transform: rotate(90deg) translateY(-1px) translateX(2px); }
+.accordion-content { padding-top: 8px; }

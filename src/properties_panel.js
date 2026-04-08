@@ -7,8 +7,10 @@ export class PropertiesPanel {
         this.onUiChange = onUiChange;
         
         this.container.innerHTML = `
-            <div class="panel-header flex-between">
-                <span>Design</span>
+            <div class="panel-header tabbed-header">
+                <div class="tab active">Design</div>
+                <div class="tab">Prototype</div>
+                <div class="tab">Inspect</div>
             </div>
             <div class="props-content" id="props-content"></div>
         `;
@@ -83,6 +85,9 @@ export class PropertiesPanel {
             <div class="prop-divider"></div>
         `;
 
+        const rotDeg = f((asset.rotation || 0) * 180 / Math.PI);
+        const radius = asset.properties.cornerRadius || 0;
+
         // Spatial inputs matching X/Y/W/H from the image
         const spatialHtml = `
             <div class="prop-section">
@@ -108,6 +113,14 @@ export class PropertiesPanel {
                     <div class="prop-input-group">
                         <span class="prop-label">H</span>
                         <input type="number" class="prop-input" data-prop="height" value="${f(asset.height)}" min="1">
+                    </div>
+                    <div class="prop-input-group">
+                        <span class="prop-label" style="font-size: 13px; transform: rotate(-90deg);">∠</span>
+                        <input type="number" class="prop-input" data-prop="rotationDeg" value="${rotDeg}">
+                    </div>
+                    <div class="prop-input-group">
+                        <span class="prop-label" style="font-size: 13px;">⦣</span>
+                        <input type="number" class="prop-input" data-prop="properties.cornerRadius" value="${radius}" min="0">
                     </div>
                 </div>
             </div>
@@ -186,71 +199,75 @@ export class PropertiesPanel {
 
         // Fill Block
         const fillHtml = `
-            <div class="prop-section">
-                <div class="flex-between section-title-row mb-8">
+            <details class="prop-accordion" open>
+                <summary class="flex-between section-title-row">
                     <span class="section-title">Fill</span>
                     <div class="actions">
                         <button class="icon-btn text-like">+</button>
                     </div>
-                </div>
-                <div class="flex-between fill-row">
-                    <div class="compound-input-container">
-                        <div class="color-swatch-label" data-color-action="properties.fill" data-current="${fillHex}" data-opacity="${asset.properties.fillOpacity !== undefined ? asset.properties.fillOpacity : 100}">
-                            <div class="color-swatch" style="background-color: ${fillHex}"></div>
+                </summary>
+                <div class="accordion-content">
+                    <div class="flex-between fill-row">
+                        <div class="compound-input-container">
+                            <div class="color-swatch-label" data-color-action="properties.fill" data-current="${fillHex}" data-opacity="${asset.properties.fillOpacity !== undefined ? asset.properties.fillOpacity : 100}">
+                                <div class="color-swatch" style="background-color: ${fillHex}"></div>
+                            </div>
+                            <input type="text" class="prop-input hex-input" data-prop="properties.fill" value="${fillHex.toUpperCase().replace('#', '')}">
+                            <div class="vertical-divider"></div>
+                            <div class="flex-row">
+                                <input type="number" class="prop-input pct-input" data-prop="properties.fillOpacity" value="${asset.properties.fillOpacity !== undefined ? asset.properties.fillOpacity : 100}" min="0" max="100">
+                                <span class="pct-symbol">%</span>
+                            </div>
                         </div>
-                        <input type="text" class="prop-input hex-input" data-prop="properties.fill" value="${fillHex.toUpperCase().replace('#', '')}">
-                        <div class="vertical-divider"></div>
-                        <div class="flex-row">
-                            <input type="number" class="prop-input pct-input" data-prop="properties.fillOpacity" value="${asset.properties.fillOpacity !== undefined ? asset.properties.fillOpacity : 100}" min="0" max="100">
-                            <span class="pct-symbol">%</span>
-                        </div>
+                        <button class="icon-btn tooltip sm" title="Toggle visibility" style="margin-left: 8px;">
+                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                        <button class="icon-btn text-like ml-8" data-action="remove-stroke">-</button>
                     </div>
-                    <button class="icon-btn tooltip sm" title="Toggle visibility">
-                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                    <button class="icon-btn text-like ml-8" data-action="remove-stroke">-</button>
                 </div>
-            </div>
-            <div class="prop-divider"></div>
+            </details>
+            <div class="prop-divider" style="margin-top: 8px;"></div>
         `;
 
         // Stroke Block
         const strokeHtml = `
-            <div class="prop-section">
-                <div class="flex-between section-title-row mb-8">
+            <details class="prop-accordion" ${hasStroke ? 'open' : ''}>
+                <summary class="flex-between section-title-row">
                     <span class="section-title">Stroke</span>
                     <div class="actions">
                         <button class="icon-btn text-like" data-action="add-stroke">+</button>
                     </div>
-                </div>
-                ${hasStroke ? `
-                <div class="flex-between fill-row mb-8">
-                    <div class="compound-input-container">
-                        <div class="color-swatch-label" data-color-action="properties.stroke" data-current="${strokeHex}" data-opacity="${asset.properties.strokeOpacity !== undefined ? asset.properties.strokeOpacity : 100}">
-                            <div class="color-swatch" style="background-color: ${strokeHex}"></div>
+                </summary>
+                <div class="accordion-content">
+                    ${hasStroke ? `
+                    <div class="flex-between fill-row mb-8">
+                        <div class="compound-input-container">
+                            <div class="color-swatch-label" data-color-action="properties.stroke" data-current="${strokeHex}" data-opacity="${asset.properties.strokeOpacity !== undefined ? asset.properties.strokeOpacity : 100}">
+                                <div class="color-swatch" style="background-color: ${strokeHex}"></div>
+                            </div>
+                            <input type="text" class="prop-input hex-input" data-prop="properties.stroke" value="${strokeHex.toUpperCase().replace('#', '')}">
+                            <div class="vertical-divider"></div>
+                            <div class="flex-row">
+                                <input type="number" class="prop-input pct-input" data-prop="properties.strokeOpacity" value="${asset.properties.strokeOpacity !== undefined ? asset.properties.strokeOpacity : 100}" min="0" max="100">
+                                <span class="pct-symbol">%</span>
+                            </div>
                         </div>
-                        <input type="text" class="prop-input hex-input" data-prop="properties.stroke" value="${strokeHex.toUpperCase().replace('#', '')}">
-                        <div class="vertical-divider"></div>
-                        <div class="flex-row">
-                            <input type="number" class="prop-input pct-input" data-prop="properties.strokeOpacity" value="${asset.properties.strokeOpacity !== undefined ? asset.properties.strokeOpacity : 100}" min="0" max="100">
-                            <span class="pct-symbol">%</span>
+                        <button class="icon-btn tooltip sm" title="Toggle visibility" style="margin-left: 8px;">
+                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                        <button class="icon-btn text-like ml-8" data-action="remove-stroke">-</button>
+                    </div>
+                    <div class="flex-row">
+                        <div class="prop-input-group small" style="width: 40px;">
+                            <input type="number" class="prop-input" data-prop="properties.strokeWidth" value="${asset.properties.strokeWidth}">
                         </div>
-                    </div>
-                    <button class="icon-btn tooltip sm" title="Toggle visibility">
-                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                    <button class="icon-btn text-like ml-8" data-action="remove-stroke">-</button>
+                        <div class="prop-dropdown dark-dropdown flex-grow ml-8" data-action="cycle-stroke-pos">
+                             <span style="font-size:10px; text-transform:capitalize;">${asset.properties.strokePosition || 'inside'}</span>
+                        </div>
+                    </div>` : ''}
                 </div>
-                <div class="flex-row">
-                    <div class="prop-input-group small" style="width: 40px;">
-                        <input type="number" class="prop-input" data-prop="properties.strokeWidth" value="${asset.properties.strokeWidth}">
-                    </div>
-                    <div class="prop-dropdown dark-dropdown flex-grow ml-8" data-action="cycle-stroke-pos">
-                         <span style="font-size:10px; text-transform:capitalize;">${asset.properties.strokePosition || 'inside'}</span>
-                    </div>
-                </div>` : ''}
-            </div>
-            <div class="prop-divider"></div>
+            </details>
+            <div class="prop-divider" style="margin-top: 8px;"></div>
         `;
 
         // Extracs placeholders
@@ -394,7 +411,9 @@ export class PropertiesPanel {
             if (!asset) return;
 
             // Handle nested properties (e.g. properties.fill)
-            if (propPath.includes('.')) {
+            if (propPath === 'rotationDeg') {
+                asset.rotation = value * Math.PI / 180;
+            } else if (propPath.includes('.')) {
                 const keys = propPath.split('.');
                 asset[keys[0]][keys[1]] = value;
             } else {

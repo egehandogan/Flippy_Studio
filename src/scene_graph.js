@@ -29,6 +29,7 @@ export class FlippyAsset {
             content: properties.content || '',
             src: properties.src || null,
             clipContent: properties.clipContent !== undefined ? properties.clipContent : (type === 'frame' ? true : false),
+            cornerRadius: properties.cornerRadius || 0,
             ...properties
         };
         
@@ -60,12 +61,18 @@ export class FlippyAsset {
 
         switch (this.type) {
             case 'frame':
-            case 'rect':
+            case 'rect': {
+                const path = new Path2D();
+                const radius = (this.properties.cornerRadius || 0) * scale;
+                if (radius > 0) {
+                     path.roundRect(rx, ry, tw, th, radius);
+                } else {
+                     path.rect(rx, ry, tw, th);
+                }
+                
                 ctx.fillStyle = this.properties.fill;
-                ctx.beginPath();
-                ctx.rect(rx, ry, tw, th);
                 ctx.globalAlpha = (this.properties.fillOpacity !== undefined ? this.properties.fillOpacity : 100) / 100;
-                ctx.fill();
+                ctx.fill(path);
                 ctx.globalAlpha = 1.0;
                 
                 if (this.properties.strokeWidth && this.properties.stroke !== 'transparent') {
@@ -74,17 +81,29 @@ export class FlippyAsset {
                     ctx.globalAlpha = (this.properties.strokeOpacity !== undefined ? this.properties.strokeOpacity : 100) / 100;
                     
                     const pos = this.properties.strokePosition || 'inside';
-                    ctx.beginPath();
+                    const oPath = new Path2D();
                     if (pos === 'inside') {
                          const i = this.properties.strokeWidth / 2;
-                         ctx.rect(rx + i, ry + i, tw - i * 2, th - i * 2);
+                         if (radius > 0) {
+                             oPath.roundRect(rx + i, ry + i, tw - i * 2, th - i * 2, Math.max(0, radius - i));
+                         } else {
+                             oPath.rect(rx + i, ry + i, tw - i * 2, th - i * 2);
+                         }
                     } else if (pos === 'outside') {
                          const o = this.properties.strokeWidth / 2;
-                         ctx.rect(rx - o, ry - o, tw + o * 2, th + o * 2);
+                         if (radius > 0) {
+                             oPath.roundRect(rx - o, ry - o, tw + o * 2, th + o * 2, radius + o);
+                         } else {
+                             oPath.rect(rx - o, ry - o, tw + o * 2, th + o * 2);
+                         }
                     } else { // center
-                         ctx.rect(rx, ry, tw, th);
+                         if (radius > 0) {
+                             oPath.roundRect(rx, ry, tw, th, radius);
+                         } else {
+                             oPath.rect(rx, ry, tw, th);
+                         }
                     }
-                    ctx.stroke();
+                    ctx.stroke(oPath);
                 }
                 ctx.globalAlpha = 1.0;
                 
@@ -96,6 +115,7 @@ export class FlippyAsset {
                     ctx.fillText(this.name, rx, ry - (6 * scale));
                 }
                 break;
+            }
             case 'circle':
                 ctx.fillStyle = this.properties.fill;
                 ctx.strokeStyle = this.properties.stroke;
@@ -128,9 +148,16 @@ export class FlippyAsset {
                 if (this.type === 'frame' && this.properties.clipContent) {
                      ctx.translate(cx, cy);
                      ctx.rotate(this.rotation);
-                     ctx.beginPath();
-                     ctx.rect(rx, ry, tw, th);
-                     ctx.clip(); 
+                     
+                     const clipPath = new Path2D();
+                     const radius = (this.properties.cornerRadius || 0) * scale;
+                     if (radius > 0) {
+                         clipPath.roundRect(rx, ry, tw, th, radius);
+                     } else {
+                         clipPath.rect(rx, ry, tw, th);
+                     }
+                     ctx.clip(clipPath); 
+                     
                      ctx.rotate(-this.rotation);
                      ctx.translate(-cx, -cy);
                 }
