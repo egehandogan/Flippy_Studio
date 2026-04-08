@@ -27,14 +27,22 @@ export class PropertiesPanel {
                     <div class="flex-between section-title-row mb-12">
                         <span class="section-title">Page</span>
                     </div>
-                    <div class="flex-between fill-row">
-                        <label class="color-swatch-wrapper">
-                            <div class="color-swatch" style="background-color: ${pageHex}"></div>
-                            <input type="color" class="color-picker-input" data-global-prop="pageColor" value="${pageHex}">
-                        </label>
-                        <input type="text" class="prop-input hex-input" data-global-prop="pageColor" value="${pageHex.toUpperCase().replace('#', '')}">
-                        <input type="number" class="prop-input small-pct" value="100" min="0" max="100" disabled>
-                        <span style="font-size:10px; color:rgba(255,255,255,0.4);">%</span>
+                    <div class="flex-between">
+                        <div class="compound-input-container">
+                            <label class="color-swatch-label">
+                                <div class="color-swatch" style="background-color: ${pageHex}"></div>
+                                <input type="color" class="hidden-color-picker" data-global-prop="pageColor" value="${pageHex}">
+                            </label>
+                            <input type="text" class="prop-input hex-input" data-global-prop="pageColor" value="${pageHex.toUpperCase().replace('#', '')}">
+                            <div class="vertical-divider"></div>
+                            <div class="flex-row">
+                                <input type="number" class="prop-input pct-input" value="100" min="0" max="100" disabled>
+                                <span class="pct-symbol">%</span>
+                            </div>
+                        </div>
+                        <button class="icon-btn tooltip sm" title="Toggle Page Visibility">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
                     </div>
                 </div>
                 <div class="prop-divider"></div>
@@ -185,14 +193,22 @@ export class PropertiesPanel {
                     </div>
                 </div>
                 <div class="flex-between fill-row">
-                    <label class="color-swatch-wrapper">
-                        <div class="color-swatch" style="background-color: ${fillHex}"></div>
-                        <input type="color" class="color-picker-input" data-prop="properties.fill" value="${fillHex}">
-                    </label>
-                    <input type="text" class="prop-input hex-input" data-prop="properties.fill" value="${fillHex.toUpperCase().replace('#', '')}">
-                    <input type="number" class="prop-input small-pct" data-prop="properties.fillOpacity" value="${asset.properties.fillOpacity !== undefined ? asset.properties.fillOpacity : 100}" min="0" max="100">
-                    <span style="font-size:10px; color:rgba(255,255,255,0.4);">%</span>
-                    <button class="icon-btn text-like">-</button>
+                    <div class="compound-input-container">
+                        <label class="color-swatch-label">
+                            <div class="color-swatch" style="background-color: ${fillHex}"></div>
+                            <input type="color" class="hidden-color-picker" data-prop="properties.fill" value="${fillHex}">
+                        </label>
+                        <input type="text" class="prop-input hex-input" data-prop="properties.fill" value="${fillHex.toUpperCase().replace('#', '')}">
+                        <div class="vertical-divider"></div>
+                        <div class="flex-row">
+                            <input type="number" class="prop-input pct-input" data-prop="properties.fillOpacity" value="${asset.properties.fillOpacity !== undefined ? asset.properties.fillOpacity : 100}" min="0" max="100">
+                            <span class="pct-symbol">%</span>
+                        </div>
+                    </div>
+                    <button class="icon-btn tooltip sm" title="Toggle visibility">
+                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                    <button class="icon-btn text-like ml-8" data-action="remove-stroke">-</button>
                 </div>
             </div>
             <div class="prop-divider"></div>
@@ -209,14 +225,22 @@ export class PropertiesPanel {
                 </div>
                 ${hasStroke ? `
                 <div class="flex-between fill-row mb-8">
-                    <label class="color-swatch-wrapper">
-                        <div class="color-swatch" style="background-color: ${strokeHex}"></div>
-                        <input type="color" class="color-picker-input" data-prop="properties.stroke" value="${strokeHex}">
-                    </label>
-                    <input type="text" class="prop-input hex-input" data-prop="properties.stroke" value="${strokeHex.toUpperCase().replace('#', '')}">
-                    <input type="number" class="prop-input small-pct" data-prop="properties.strokeOpacity" value="${asset.properties.strokeOpacity !== undefined ? asset.properties.strokeOpacity : 100}" min="0" max="100">
-                    <span style="font-size:10px; color:rgba(255,255,255,0.4);">%</span>
-                    <button class="icon-btn text-like" data-action="remove-stroke">-</button>
+                    <div class="compound-input-container">
+                        <label class="color-swatch-label">
+                            <div class="color-swatch" style="background-color: ${strokeHex}"></div>
+                            <input type="color" class="hidden-color-picker" data-prop="properties.stroke" value="${strokeHex}">
+                        </label>
+                        <input type="text" class="prop-input hex-input" data-prop="properties.stroke" value="${strokeHex.toUpperCase().replace('#', '')}">
+                        <div class="vertical-divider"></div>
+                        <div class="flex-row">
+                            <input type="number" class="prop-input pct-input" data-prop="properties.strokeOpacity" value="${asset.properties.strokeOpacity !== undefined ? asset.properties.strokeOpacity : 100}" min="0" max="100">
+                            <span class="pct-symbol">%</span>
+                        </div>
+                    </div>
+                    <button class="icon-btn tooltip sm" title="Toggle visibility">
+                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                    <button class="icon-btn text-like ml-8" data-action="remove-stroke">-</button>
                 </div>
                 <div class="flex-row">
                     <div class="prop-input-group small" style="width: 40px;">
@@ -324,17 +348,16 @@ export class PropertiesPanel {
             value = '#' + value.replace('#', '');
         }
 
-        // Global Page Props
+        // Live UI sync for Page background
         if (inputEl.dataset.globalProp) {
             const propPath = inputEl.dataset.globalProp;
             this.sceneGraph[propPath] = value;
             
-            // Live UI sync for Page background
-            const row = inputEl.closest('.fill-row');
-            if (row) {
-                const swatch = row.querySelector('.color-swatch');
+            const compound = inputEl.closest('.compound-input-container');
+            if (compound) {
+                const swatch = compound.querySelector('.color-swatch');
                 if (swatch) swatch.style.backgroundColor = value;
-                const hexText = row.querySelector('.hex-input');
+                const hexText = compound.querySelector('.hex-input');
                 if (hexText && inputEl.type === 'color') hexText.value = value.toUpperCase().replace('#', '');
             }
 
@@ -364,11 +387,11 @@ export class PropertiesPanel {
 
         // Live UI sync for sliding color pickers without disrupting input focus
         if (propPath === 'properties.fill' || propPath === 'properties.stroke') {
-            const row = inputEl.closest('.fill-row');
-            if (row) {
-                const swatch = row.querySelector('.color-swatch');
+            const compound = inputEl.closest('.compound-input-container');
+            if (compound) {
+                const swatch = compound.querySelector('.color-swatch');
                 if (swatch) swatch.style.backgroundColor = value;
-                const hexText = row.querySelector('.hex-input');
+                const hexText = compound.querySelector('.hex-input');
                 if (hexText && inputEl.type === 'color') {
                     hexText.value = value.toUpperCase().replace('#', '');
                 }
