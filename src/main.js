@@ -79,10 +79,12 @@ const clipboardManager = new ClipboardManager(sceneGraph);
 
 const layersPanel = new LayersPanel('.layers-panel', sceneGraph, (saveHistory) => {
     if (saveHistory) historyManager.saveState();
+    else engine.draw(sceneGraph);
 });
 
 const propertiesPanel = new PropertiesPanel('.properties-panel', sceneGraph, (saveHistory) => {
     if (saveHistory) historyManager.saveState();
+    else engine.draw(sceneGraph);
 });
 
 historyManager.onStateChange = () => { 
