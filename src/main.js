@@ -4,6 +4,10 @@ import { SceneGraph, FlippyAsset } from './scene_graph'
 import { FloatingToolbar } from './toolbar'
 import { LayersPanel } from './layers_panel'
 import { PropertiesPanel } from './properties_panel'
+import { requireAuth } from './auth.js'
+
+// Guard: redirect to login if no session
+const session = requireAuth();
 
 const sceneGraph = new SceneGraph();
 const engine = new CanvasEngine('flippy-canvas');
@@ -415,4 +419,5 @@ window.addEventListener('keydown', (e) => {
 });
 
 engine.resetTransform();
-engine.draw(sceneGraph);
+engine.startRenderLoop(sceneGraph);
+

@@ -84,8 +84,27 @@ export class CanvasEngine {
             const t = { ...this.transform, isSelected: sceneGraph.selectedAssetIds.has(asset.id) };
             asset.render(this.ctx, t, sceneGraph);
         });
-        
-        requestAnimationFrame(() => this.draw(sceneGraph));
+    }
+
+    /**
+     * Starts a continuous render loop driven by requestAnimationFrame.
+     * Call this ONCE from main.js after initialization.
+     * The loop cleanly re-draws every frame (needed for pan/zoom smoothness).
+     */
+    startRenderLoop(sceneGraph) {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        const loop = () => {
+            this.draw(sceneGraph);
+            this._rafId = requestAnimationFrame(loop);
+        };
+        this._rafId = requestAnimationFrame(loop);
+    }
+
+    stopRenderLoop() {
+        if (this._rafId) {
+            cancelAnimationFrame(this._rafId);
+            this._rafId = null;
+        }
     }
 
     drawGrid() {

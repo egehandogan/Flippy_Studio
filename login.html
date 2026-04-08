@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flippy Studio — Sign In</title>
+  <meta name="description" content="Sign in to Flippy Studio — the design-to-engine platform for game creators." />
+  <link rel="icon" type="image/svg+xml" href="/flippy_logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/auth.css" />
+</head>
+<body>
+
+<!-- Background -->
+<div class="auth-bg"></div>
+
+<div class="auth-page">
+
+  <!-- Brand -->
+  <a class="auth-brand" href="#">
+    <div class="auth-brand-logo">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M8 8l8 4-8 4V8z" fill="white" opacity="0.9"/>
+      </svg>
+    </div>
+    <span class="auth-brand-name">Flippy</span>
+  </a>
+
+  <!-- Card -->
+  <div class="auth-card" id="auth-card">
+
+    <!-- Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="signin" id="tab-signin">Sign In</button>
+      <button class="auth-tab" data-tab="signup" id="tab-signup">Create Account</button>
+    </div>
+
+    <!-- Global Alert -->
+    <div class="auth-alert" id="auth-alert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span id="auth-alert-msg"></span>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         SIGN IN FORM
+    ═══════════════════════════════════ -->
+    <div id="form-signin">
+      <div class="auth-form-wrap">
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-subtitle">Sign in to continue to Flippy Studio.</p>
+
+        <!-- Social -->
+        <div class="social-row">
+          <button class="social-btn" id="google-signin-btn" type="button">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Google
+          </button>
+          <button class="social-btn" id="github-signin-btn" type="button">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+            GitHub
+          </button>
+        </div>
+
+        <div class="auth-divider"><span>or continue with email</span></div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="signin-email">Email</label>
+          <div class="input-wrap">
+            <input type="email" id="signin-email" class="form-input" placeholder="you@example.com" autocomplete="email" />
+            <div class="input-icon">
+              <svg class="input-status-icon icon-valid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <svg class="input-status-icon icon-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+            </div>
+          </div>
+          <div class="field-message" id="signin-email-msg"></div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label" for="signin-password">
+            Password
+            <a href="#" id="forgot-link">Forgot password?</a>
+          </label>
+          <div class="input-wrap">
+            <input type="password" id="signin-password" class="form-input" placeholder="Enter your password" autocomplete="current-password" />
+            <div class="input-icon">
+              <svg class="input-status-icon icon-valid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <svg class="input-status-icon icon-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+              <svg class="icon-eye clickable" id="toggle-signin-pw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events: auto; cursor: pointer;">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+          </div>
+          <div class="field-message" id="signin-password-msg"></div>
+        </div>
+
+        <button class="auth-submit" id="signin-btn" type="button">
+          <span class="btn-text">Sign In to Flippy</span>
+          <div class="spinner"></div>
+        </button>
+      </div>
+
+      <div class="auth-footer">
+        <p class="auth-switch-text">
+          Don't have an account? <button class="link-btn" data-switch="signup">Create one for free →</button>
+        </p>
+        <button class="dev-login-btn" id="dev-login-btn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+          </svg>
+          Developer Login — Skip Auth
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         SIGN UP FORM
+    ═══════════════════════════════════ -->
+    <div id="form-signup" style="display:none;">
+      <div class="auth-form-wrap">
+        <h1 class="auth-title">Create your account</h1>
+        <p class="auth-subtitle">Join Flippy Studio and start designing for game engines.</p>
+
+        <!-- Social -->
+        <div class="social-row">
+          <button class="social-btn" type="button">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Google
+          </button>
+          <button class="social-btn" type="button">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+            GitHub
+          </button>
+        </div>
+
+        <div class="auth-divider"><span>or fill in your details</span></div>
+
+        <!-- Name -->
+        <div class="form-group">
+          <label class="form-label" for="signup-name">Full Name</label>
+          <div class="input-wrap">
+            <input type="text" id="signup-name" class="form-input" placeholder="Jane Smith" autocomplete="name" />
+            <div class="input-icon">
+              <svg class="input-status-icon icon-valid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg class="input-status-icon icon-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+          </div>
+          <div class="field-message" id="signup-name-msg"></div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="signup-email">Email Address</label>
+          <div class="input-wrap">
+            <input type="email" id="signup-email" class="form-input" placeholder="you@example.com" autocomplete="email" />
+            <div class="input-icon">
+              <svg class="input-status-icon icon-valid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg class="input-status-icon icon-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+          </div>
+          <div class="field-message" id="signup-email-msg"></div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label" for="signup-password">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="signup-password" class="form-input" placeholder="Min. 8 characters" autocomplete="new-password" />
+            <div class="input-icon">
+              <svg class="input-status-icon icon-valid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg class="input-status-icon icon-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <svg class="icon-eye clickable" id="toggle-signup-pw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events: auto; cursor: pointer;">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+          </div>
+          <div class="field-message" id="signup-password-msg"></div>
+          <!-- Strength Meter -->
+          <div class="password-strength" id="password-strength">
+            <div class="strength-bars">
+              <div class="strength-bar" id="sb-1"></div>
+              <div class="strength-bar" id="sb-2"></div>
+              <div class="strength-bar" id="sb-3"></div>
+              <div class="strength-bar" id="sb-4"></div>
+            </div>
+            <div class="strength-label" id="strength-label">Too weak</div>
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label class="form-label" for="signup-confirm">Confirm Password</label>
+          <div class="input-wrap">
+            <input type="password" id="signup-confirm" class="form-input" placeholder="Repeat your password" autocomplete="new-password" />
+            <div class="input-icon">
+              <svg class="input-status-icon icon-valid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg class="input-status-icon icon-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+          </div>
+          <div class="field-message" id="signup-confirm-msg"></div>
+        </div>
+
+        <!-- Terms -->
+        <label class="checkbox-row">
+          <input type="checkbox" id="terms-check" />
+          <div class="checkbox-custom"></div>
+          <span class="checkbox-label">
+            I agree to the <a href="#" onclick="return false;">Terms of Service</a> and <a href="#" onclick="return false;">Privacy Policy</a>
+          </span>
+        </label>
+
+        <button class="auth-submit" id="signup-btn" type="button">
+          <span class="btn-text">Create Account →</span>
+          <div class="spinner"></div>
+        </button>
+      </div>
+
+      <div class="auth-footer">
+        <p class="auth-switch-text">
+          Already have an account? <button class="link-btn" data-switch="signin">Sign in →</button>
+        </p>
+        <button class="dev-login-btn" id="dev-login-btn-2" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+          </svg>
+          Developer Login — Skip Auth
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /auth-card -->
+
+  <!-- Footer links -->
+  <p style="margin-top: 24px; font-size: 11px; color: rgba(255,255,255,0.2); text-align: center;">
+    © 2025 Flippy Studio. All rights reserved.
+  </p>
+
+</div><!-- /auth-page -->
+
+<!-- Toast -->
+<div class="auth-toast" id="auth-toast">
+  <div class="auth-toast-dot" id="toast-dot"></div>
+  <span id="toast-msg"></span>
+</div>
+
+<script type="module">
+import { Validators, signIn, signUp, devLogin, requireNoAuth } from '/src/auth.js';
+
+// Redirect if already logged in
+requireNoAuth();
+
+// ── Tab Switching ──────────────────────────────────────────────────────────
+const tabSignin = document.getElementById('tab-signin');
+const tabSignup = document.getElementById('tab-signup');
+const formSignin = document.getElementById('form-signin');
+const formSignup = document.getElementById('form-signup');
+
+function switchTo(mode) {
+  const isSignin = mode === 'signin';
+  tabSignin.classList.toggle('active', isSignin);
+  tabSignup.classList.toggle('active', !isSignin);
+  formSignin.style.display = isSignin ? '' : 'none';
+  formSignup.style.display = isSignin ? 'none' : '';
+  hideAlert();
+}
+
+document.querySelectorAll('[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => switchTo(btn.dataset.tab));
+});
+document.querySelectorAll('[data-switch]').forEach(btn => {
+  btn.addEventListener('click', () => switchTo(btn.dataset.switch));
+});
+
+// ── Alert Banner ──────────────────────────────────────────────────────────
+const alertEl = document.getElementById('auth-alert');
+const alertMsg = document.getElementById('auth-alert-msg');
+
+function showAlert(msg, type = 'error') {
+  alertEl.className = `auth-alert ${type} show`;
+  alertMsg.textContent = msg;
+}
+function hideAlert() {
+  alertEl.className = 'auth-alert';
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = 'default') {
+  const toast = document.getElementById('auth-toast');
+  const dot = document.getElementById('toast-dot');
+  const text = document.getElementById('toast-msg');
+  text.textContent = msg;
+  dot.style.background = type === 'dev' ? '#8B5CF6' : '#10B981';
+  toast.className = `auth-toast show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.className = 'auth-toast', 3000);
+}
+
+// ── Field Validation Helpers ──────────────────────────────────────────────
+function setFieldState(input, msgEl, result) {
+  input.classList.remove('is-valid', 'is-error');
+  msgEl.className = 'field-message';
+  msgEl.textContent = '';
+
+  if (result === null) return; // untouched
+
+  if (result.ok) {
+    input.classList.add('is-valid');
+    if (result.msg) {
+      msgEl.className = 'field-message success';
+      msgEl.textContent = result.msg;
+    }
+  } else {
+    input.classList.add('is-error');
+    msgEl.className = 'field-message error';
+    msgEl.textContent = result.msg;
+  }
+}
+
+// ── Password Toggle ────────────────────────────────────────────────────────
+function bindPasswordToggle(toggleId, inputId) {
+  const toggle = document.getElementById(toggleId);
+  const input = document.getElementById(inputId);
+  if (!toggle || !input) return;
+  toggle.addEventListener('click', () => {
+    const isText = input.type === 'text';
+    input.type = isText ? 'password' : 'text';
+    toggle.style.opacity = isText ? '0.5' : '1';
+  });
+}
+bindPasswordToggle('toggle-signin-pw', 'signin-password');
+bindPasswordToggle('toggle-signup-pw', 'signup-password');
+
+// ── Password Strength ──────────────────────────────────────────────────────
+const strengthBarEls = [
+  document.getElementById('sb-1'),
+  document.getElementById('sb-2'),
+  document.getElementById('sb-3'),
+  document.getElementById('sb-4')
+];
+const strengthLabels = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong'];
+const strengthClasses = ['', 'filled-weak', 'filled-fair', 'filled-good', 'filled-strong'];
+const strengthColors = ['', '#EF4444', '#F59E0B', '#3B82F6', '#10B981'];
+
+function updateStrengthMeter(score) {
+  const meter = document.getElementById('password-strength');
+  const label = document.getElementById('strength-label');
+  meter.style.display = score > 0 ? 'block' : 'none';
+  strengthBarEls.forEach((bar, i) => {
+    bar.className = 'strength-bar';
+    if (i < score) bar.classList.add(strengthClasses[score]);
+  });
+  label.textContent = strengthLabels[score] || '';
+  label.style.color = strengthColors[score] || 'rgba(255,255,255,0.3)';
+}
+
+// ── Sign In Validation ─────────────────────────────────────────────────────
+const siEmail = document.getElementById('signin-email');
+const siPassword = document.getElementById('signin-password');
+const siEmailMsg = document.getElementById('signin-email-msg');
+const siPasswordMsg = document.getElementById('signin-password-msg');
+let siEmailTouched = false, siPasswordTouched = false;
+
+siEmail.addEventListener('blur', () => {
+  siEmailTouched = true;
+  setFieldState(siEmail, siEmailMsg, Validators.email.validate(siEmail.value));
+});
+siEmail.addEventListener('input', () => {
+  if (siEmailTouched) setFieldState(siEmail, siEmailMsg, Validators.email.validate(siEmail.value));
+  hideAlert();
+});
+
+siPassword.addEventListener('blur', () => {
+  siPasswordTouched = true;
+  if (siPassword.value) setFieldState(siPassword, siPasswordMsg, { ok: true, msg: '' });
+});
+siPassword.addEventListener('input', () => { hideAlert(); });
+
+document.getElementById('signin-btn').addEventListener('click', async () => {
+  siEmailTouched = true; siPasswordTouched = true;
+  const emailResult = Validators.email.validate(siEmail.value);
+  setFieldState(siEmail, siEmailMsg, emailResult);
+
+  if (!emailResult.ok) return;
+  if (!siPassword.value) {
+    setFieldState(siPassword, siPasswordMsg, { ok: false, msg: 'Password is required.' });
+    return;
+  }
+
+  const btn = document.getElementById('signin-btn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  await new Promise(r => setTimeout(r, 900)); // simulate network
+
+  const result = signIn({ email: siEmail.value, password: siPassword.value });
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+
+  if (result.success) {
+    showToast(`Welcome back, ${result.user.name}!`);
+    setTimeout(() => window.location.href = '/launcher.html', 700);
+  } else {
+    if (result.field === 'email') {
+      setFieldState(siEmail, siEmailMsg, { ok: false, msg: result.msg });
+    } else if (result.field === 'password') {
+      setFieldState(siPassword, siPasswordMsg, { ok: false, msg: result.msg });
+    } else {
+      showAlert(result.msg);
+    }
+  }
+});
+
+document.getElementById('forgot-link').addEventListener('click', (e) => {
+  e.preventDefault();
+  showToast('Password reset coming soon!');
+});
+
+document.querySelectorAll('.social-btn').forEach(btn => {
+  btn.addEventListener('click', () => showToast('Social login coming soon!'));
+});
+
+// ── Sign Up Validation ─────────────────────────────────────────────────────
+const suName = document.getElementById('signup-name');
+const suEmail = document.getElementById('signup-email');
+const suPassword = document.getElementById('signup-password');
+const suConfirm = document.getElementById('signup-confirm');
+const suNameMsg = document.getElementById('signup-name-msg');
+const suEmailMsg = document.getElementById('signup-email-msg');
+const suPasswordMsg = document.getElementById('signup-password-msg');
+const suConfirmMsg = document.getElementById('signup-confirm-msg');
+
+suName.addEventListener('blur', () => setFieldState(suName, suNameMsg, Validators.name.validate(suName.value)));
+suName.addEventListener('input', () => { if (suName.classList.contains('is-error') || suName.classList.contains('is-valid')) setFieldState(suName, suNameMsg, Validators.name.validate(suName.value)); });
+
+suEmail.addEventListener('blur', () => setFieldState(suEmail, suEmailMsg, Validators.email.validate(suEmail.value)));
+suEmail.addEventListener('input', () => { if (suEmail.classList.contains('is-error') || suEmail.classList.contains('is-valid')) setFieldState(suEmail, suEmailMsg, Validators.email.validate(suEmail.value)); hideAlert(); });
+
+suPassword.addEventListener('input', () => {
+  const result = Validators.password.validate(suPassword.value, 'signup');
+  updateStrengthMeter(result.strength || 0);
+  if (suPassword.classList.contains('is-error') || suPassword.classList.contains('is-valid')) {
+    setFieldState(suPassword, suPasswordMsg, result);
+  }
+  // Re-check confirm if already touched
+  if (suConfirm.value) {
+    setFieldState(suConfirm, suConfirmMsg, Validators.confirmPassword.validate(suConfirm.value, suPassword.value));
+  }
+});
+suPassword.addEventListener('blur', () => {
+  const result = Validators.password.validate(suPassword.value, 'signup');
+  updateStrengthMeter(result.strength || 0);
+  setFieldState(suPassword, suPasswordMsg, result);
+});
+
+suConfirm.addEventListener('blur', () => setFieldState(suConfirm, suConfirmMsg, Validators.confirmPassword.validate(suConfirm.value, suPassword.value)));
+suConfirm.addEventListener('input', () => {
+  if (suConfirm.classList.contains('is-error') || suConfirm.classList.contains('is-valid')) {
+    setFieldState(suConfirm, suConfirmMsg, Validators.confirmPassword.validate(suConfirm.value, suPassword.value));
+  }
+});
+
+document.getElementById('signup-btn').addEventListener('click', async () => {
+  const nameR = Validators.name.validate(suName.value);
+  const emailR = Validators.email.validate(suEmail.value);
+  const passwordR = Validators.password.validate(suPassword.value, 'signup');
+  const confirmR = Validators.confirmPassword.validate(suConfirm.value, suPassword.value);
+  const termsChecked = document.getElementById('terms-check').checked;
+
+  setFieldState(suName, suNameMsg, nameR);
+  setFieldState(suEmail, suEmailMsg, emailR);
+  setFieldState(suPassword, suPasswordMsg, passwordR);
+  setFieldState(suConfirm, suConfirmMsg, confirmR);
+
+  if (!nameR.ok || !emailR.ok || !passwordR.ok || !confirmR.ok) return;
+  if (!termsChecked) {
+    showAlert('Please accept the Terms of Service to continue.');
+    return;
+  }
+
+  const btn = document.getElementById('signup-btn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  await new Promise(r => setTimeout(r, 1100));
+
+  const result = signUp({ name: suName.value, email: suEmail.value, password: suPassword.value });
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+
+  if (result.success) {
+    showToast(`Account created! Welcome, ${result.user.name} 🎉`);
+    setTimeout(() => window.location.href = '/launcher.html', 700);
+  } else {
+    if (result.field === 'email') setFieldState(suEmail, suEmailMsg, { ok: false, msg: result.msg });
+    else showAlert(result.msg);
+  }
+});
+
+// ── Developer Login ────────────────────────────────────────────────────────
+function handleDevLogin() {
+  const user = devLogin();
+  showToast(`Dev login → ${user.email}`, 'dev');
+  setTimeout(() => window.location.href = '/launcher.html', 700);
+}
+
+document.getElementById('dev-login-btn').addEventListener('click', handleDevLogin);
+document.getElementById('dev-login-btn-2').addEventListener('click', handleDevLogin);
+
+// Enter key support
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  const active = document.activeElement;
+  if (!active || !active.matches('.form-input')) return;
+  const isSignup = formSignup.style.display !== 'none';
+  if (isSignup) document.getElementById('signup-btn').click();
+  else document.getElementById('signin-btn').click();
+});
+</script>
+</body>
+</html>
