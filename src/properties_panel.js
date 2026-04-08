@@ -323,6 +323,19 @@ export class PropertiesPanel {
             }
         });
 
+        // Live UI sync for sliding color pickers without disrupting input focus
+        if (propPath === 'properties.fill' || propPath === 'properties.stroke') {
+            const row = inputEl.closest('.fill-row');
+            if (row) {
+                const swatch = row.querySelector('.color-swatch');
+                if (swatch) swatch.style.backgroundColor = value;
+                const hexText = row.querySelector('.hex-input');
+                if (hexText && inputEl.type === 'color') {
+                    hexText.value = value.toUpperCase().replace('#', '');
+                }
+            }
+        }
+
         if (saveHistory) {
             this.onUiChange(true);
         } else {
