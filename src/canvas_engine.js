@@ -71,6 +71,9 @@ export class CanvasEngine {
     draw(sceneGraph) {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
+        this.ctx.fillStyle = sceneGraph.pageColor || '#1E1E1E';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
         // 1. Draw Infinite Grid (Dots)
         this.drawGrid();
         

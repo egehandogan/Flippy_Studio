@@ -57,17 +57,17 @@ export class LayersPanel {
                 <span class="layer-name">${asset.name}</span>
             </div>
             <div class="layer-actions">
-                <span class="layer-lock ${asset.locked ? 'active' : ''}" data-action="lock" title="Lock">
+                <button class="layer-lock ${asset.locked ? 'active' : ''}" data-action="lock" title="Lock">
                     ${asset.locked ? 
                         `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>` : 
                         `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`}
-                </span>
-                <span class="layer-visible ${!asset.visible ? 'active' : ''}" data-action="visible" title="Toggle Visibility">
+                </button>
+                <button class="layer-visible ${!asset.visible ? 'active' : ''}" data-action="visible" title="Toggle Visibility">
                     ${asset.visible ? 
                         `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>` :
                         `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22"/></svg>`
                     }
-                </span>
+                </button>
             </div>
         `;
         

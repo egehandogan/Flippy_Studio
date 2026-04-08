@@ -16,17 +16,35 @@ export class PropertiesPanel {
     }
 
     render() {
+        const f = (n) => Math.round(n);
+        
         const selectedIds = Array.from(this.sceneGraph.selectedAssetIds);
         if (selectedIds.length === 0) {
-            this.content.innerHTML = `<div class="empty-state">No selection</div>`;
+            // "Page" State - Global Background Color
+            const pageHex = this.ensureHex(this.sceneGraph.pageColor || '#1E1E1E');
+            this.content.innerHTML = `
+                <div class="prop-section">
+                    <div class="flex-between section-title-row mb-12">
+                        <span class="section-title">Page</span>
+                    </div>
+                    <div class="flex-between fill-row">
+                        <label class="color-swatch-wrapper">
+                            <div class="color-swatch" style="background-color: ${pageHex}"></div>
+                            <input type="color" class="color-picker-input" data-global-prop="pageColor" value="${pageHex}">
+                        </label>
+                        <input type="text" class="prop-input hex-input" data-global-prop="pageColor" value="${pageHex.toUpperCase().replace('#', '')}">
+                        <input type="number" class="prop-input small-pct" value="100" min="0" max="100" disabled>
+                        <span style="font-size:10px; color:rgba(255,255,255,0.4);">%</span>
+                    </div>
+                </div>
+                <div class="prop-divider"></div>
+            `;
             return;
         }
 
         const assetId = selectedIds[selectedIds.length - 1]; // Take the most recently selected
         const asset = this.sceneGraph.assets.find(a => a.id === assetId);
         if (!asset) return;
-
-        const f = (n) => Math.round(n);
         const fillHex = this.ensureHex(asset.properties.fill);
         const strokeHex = this.ensureHex(asset.properties.stroke);
         const hasStroke = asset.properties.stroke !== 'transparent' && asset.properties.strokeWidth > 0;
@@ -167,10 +185,10 @@ export class PropertiesPanel {
                     </div>
                 </div>
                 <div class="flex-between fill-row">
-                    <div class="color-swatch-wrapper">
+                    <label class="color-swatch-wrapper">
                         <div class="color-swatch" style="background-color: ${fillHex}"></div>
                         <input type="color" class="color-picker-input" data-prop="properties.fill" value="${fillHex}">
-                    </div>
+                    </label>
                     <input type="text" class="prop-input hex-input" data-prop="properties.fill" value="${fillHex.toUpperCase().replace('#', '')}">
                     <input type="number" class="prop-input small-pct" data-prop="properties.fillOpacity" value="${asset.properties.fillOpacity !== undefined ? asset.properties.fillOpacity : 100}" min="0" max="100">
                     <span style="font-size:10px; color:rgba(255,255,255,0.4);">%</span>
@@ -191,10 +209,10 @@ export class PropertiesPanel {
                 </div>
                 ${hasStroke ? `
                 <div class="flex-between fill-row mb-8">
-                    <div class="color-swatch-wrapper">
+                    <label class="color-swatch-wrapper">
                         <div class="color-swatch" style="background-color: ${strokeHex}"></div>
                         <input type="color" class="color-picker-input" data-prop="properties.stroke" value="${strokeHex}">
-                    </div>
+                    </label>
                     <input type="text" class="prop-input hex-input" data-prop="properties.stroke" value="${strokeHex.toUpperCase().replace('#', '')}">
                     <input type="number" class="prop-input small-pct" data-prop="properties.strokeOpacity" value="${asset.properties.strokeOpacity !== undefined ? asset.properties.strokeOpacity : 100}" min="0" max="100">
                     <span style="font-size:10px; color:rgba(255,255,255,0.4);">%</span>
@@ -255,7 +273,7 @@ export class PropertiesPanel {
 
         this.container.addEventListener('input', (e) => {
             // Colors update continuously on sliding
-            if (e.target.matches('input[type="color"][data-prop]')) {
+            if (e.target.matches('input[type="color"][data-prop]') || e.target.matches('input[type="color"][data-global-prop]')) {
                 this.updateAssetFromInput(e.target, false); // Don't save history on every drag frame
             }
         });
@@ -296,7 +314,6 @@ export class PropertiesPanel {
     }
 
     updateAssetFromInput(inputEl, saveHistory = true) {
-        const propPath = inputEl.dataset.prop;
         let value = inputEl.value;
 
         if (inputEl.type === 'number') {
@@ -306,6 +323,28 @@ export class PropertiesPanel {
         if (inputEl.classList.contains('hex-input')) {
             value = '#' + value.replace('#', '');
         }
+
+        // Global Page Props
+        if (inputEl.dataset.globalProp) {
+            const propPath = inputEl.dataset.globalProp;
+            this.sceneGraph[propPath] = value;
+            
+            // Live UI sync for Page background
+            const row = inputEl.closest('.fill-row');
+            if (row) {
+                const swatch = row.querySelector('.color-swatch');
+                if (swatch) swatch.style.backgroundColor = value;
+                const hexText = row.querySelector('.hex-input');
+                if (hexText && inputEl.type === 'color') hexText.value = value.toUpperCase().replace('#', '');
+            }
+
+            if (saveHistory) this.onUiChange(true);
+            else this.onUiChange(false);
+            if (saveHistory) this.render();
+            return;
+        }
+
+        const propPath = inputEl.dataset.prop;
 
         const selectedIds = Array.from(this.sceneGraph.selectedAssetIds);
         if (selectedIds.length === 0) return;

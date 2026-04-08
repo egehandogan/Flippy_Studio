@@ -282,6 +282,7 @@ export class SceneGraph {
     constructor() {
         this.assets = [];
         this.selectedAssetIds = new Set();
+        this.pageColor = '#1E1E1E';
     }
 
     addAsset(asset) {
@@ -353,10 +354,20 @@ export class SceneGraph {
     }
 
     serialize() {
-        return this.assets.map(a => a.serialize());
+        return {
+            pageColor: this.pageColor,
+            assets: this.assets.map(a => a.serialize())
+        };
     }
 
     deserialize(data) {
-        this.assets = data.map(d => FlippyAsset.deserialize(d));
+        if (Array.isArray(data)) {
+            // Legacy format support
+            this.pageColor = '#1E1E1E';
+            this.assets = data.map(d => FlippyAsset.deserialize(d));
+        } else {
+            this.pageColor = data.pageColor || '#1E1E1E';
+            this.assets = (data.assets || []).map(d => FlippyAsset.deserialize(d));
+        }
     }
 }

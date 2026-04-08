@@ -79,17 +79,18 @@ const clipboardManager = new ClipboardManager(sceneGraph);
 
 const layersPanel = new LayersPanel('.layers-panel', sceneGraph, (saveHistory) => {
     if (saveHistory) historyManager.saveState();
-    else engine.draw(sceneGraph);
+    engine.draw(sceneGraph);
 });
 
 const propertiesPanel = new PropertiesPanel('.properties-panel', sceneGraph, (saveHistory) => {
     if (saveHistory) historyManager.saveState();
-    else engine.draw(sceneGraph);
+    engine.draw(sceneGraph);
 });
 
 historyManager.onStateChange = () => { 
     layersPanel.render(); 
     propertiesPanel.render(); 
+    engine.draw(sceneGraph);
 };
 
 let activeTool = 'cursor';
@@ -365,9 +366,10 @@ window.addEventListener('keydown', (e) => {
     const key = e.key;
     const toolKey = key.toLowerCase();
     
-    // Ignore if typing in an input/textarea
-    if (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable) {
-        if (key === 'Escape') document.activeElement.blur();
+    // Ignore if typing in an input/textarea to prevent deleting the canvas asset while editing properties
+    const activeObj = document.activeElement;
+    if (activeObj && (activeObj.tagName === 'INPUT' || activeObj.tagName === 'TEXTAREA' || activeObj.isContentEditable)) {
+        if (key === 'Escape') activeObj.blur();
         return;
     }
 
