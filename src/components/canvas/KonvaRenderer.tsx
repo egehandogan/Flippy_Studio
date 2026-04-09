@@ -227,7 +227,10 @@ const KonvaRenderer: React.FC = () => {
       return;
     }
 
-    const id = e.target.id();
+    const target = e.target;
+    const selectable = target.name() === 'selectable' ? target : target.findAncestor('.selectable');
+    const id = selectable?.id();
+
     if (activeTool === 'cursor' && id) {
       selectAssets([id]);
     }

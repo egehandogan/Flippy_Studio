@@ -250,28 +250,45 @@ const FrameLibrary: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-[#0D0D0D] border-l border-white/5 animate-in slide-in-from-right duration-300">
-      <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+      <div className="p-4 border-b border-white/5 flex flex-col gap-1 bg-white/[0.02]">
         <div className="flex items-center gap-2">
           <Layout size={14} className="text-flippy-blue" />
           <span className="text-[11px] font-bold text-white uppercase tracking-wider">Frame Library</span>
         </div>
+        <p className="text-[9px] text-white/30 font-medium">Select a device or game genre to start your layout</p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
         {!selectedCatId ? (
-          <div className="grid grid-cols-2 gap-2">
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCatId(cat.id)}
-                className="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group"
-              >
-                <div className="p-3 rounded-lg bg-white/5 text-white/40 group-hover:text-flippy-blue group-hover:bg-flippy-blue/10 transition-all">
-                  {cat.icon}
+          <div className="space-y-4">
+             {/* Quick Tip */}
+             <div className="p-3 rounded-xl bg-flippy-blue/5 border border-flippy-blue/10 flex gap-3">
+                <div className="w-8 h-8 rounded-lg bg-flippy-blue/10 flex items-center justify-center shrink-0">
+                  <Monitor size={14} className="text-flippy-blue" />
                 </div>
-                <span className="text-[10px] font-bold text-white/60 tracking-tight">{cat.name}</span>
-              </button>
-            ))}
+                <div className="flex flex-col gap-0.5">
+                   <span className="text-[10px] font-bold text-white">Quick Guide</span>
+                   <p className="text-[9px] text-white/40 leading-relaxed">Click a category below to pick a size, or <b>Draw Manual</b> directly on canvas.</p>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-2">
+                {CATEGORIES.map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCatId(cat.id)}
+                    className="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ChevronRight size={10} className="text-flippy-blue" />
+                    </div>
+                    <div className="p-3 rounded-lg bg-white/5 text-white/40 group-hover:text-flippy-blue group-hover:bg-flippy-blue/10 transition-all">
+                      {cat.icon}
+                    </div>
+                    <span className="text-[10px] font-bold text-white/60 tracking-tight">{cat.name}</span>
+                  </button>
+                ))}
+             </div>
           </div>
         ) : (
           <div className="space-y-4">
