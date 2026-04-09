@@ -39,6 +39,8 @@ const GenerationPanel: React.FC = () => {
     addGeneratedImage,
   } = useAIStore();
 
+  const [error, setError] = React.useState<string | null>(null);
+
   const addAsset = useSceneStore((s) => s.addAsset);
   const selectAssets = useSceneStore((s) => s.selectAssets);
 
@@ -49,6 +51,7 @@ const GenerationPanel: React.FC = () => {
     setIsGenerating(true);
 
     try {
+      setError(null);
       const fullPrompt = styleDetails.trim() ? `${prompt}, ${styleDetails}` : prompt;
       const url = await generateImageFromHF(fullPrompt, negativePrompt, selectedModel);
       addGeneratedImage({
@@ -58,8 +61,9 @@ const GenerationPanel: React.FC = () => {
         model: selectedModel,
         timestamp: Date.now(),
       });
-    } catch (error) {
-      console.error('Generation failed:', error);
+    } catch (err: any) {
+      console.error('Generation failed:', err);
+      setError(err.message || 'Üretim sırasında bir hata oluştu.');
     } finally {
       setIsGenerating(false);
     }
@@ -217,6 +221,22 @@ const GenerationPanel: React.FC = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400"
+            >
+              <div className="shrink-0 w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
+                <span className="font-bold">!</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest">Generation Error</p>
+                <p className="text-[11px] opacity-70">{error}</p>
+              </div>
+            </motion.div>
+          )}
+
           {generatedImages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
               <div className="w-20 h-20 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-center">

@@ -1,6 +1,6 @@
 import { HfInference } from '@huggingface/inference';
 
-const HF_TOKEN = import.meta.env.VITE_HF_TOKEN || '';
+const HF_TOKEN = import.meta.env.VITE_HF_API_KEY || '';
 
 const hf = new HfInference(HF_TOKEN);
 
@@ -16,6 +16,10 @@ export async function generateImageFromHF(
   negativePrompt: string,
   modelKey: string
 ): Promise<string> {
+  if (!HF_TOKEN) {
+    throw new Error('AI API Anahtarı eksik. Lütfen .env dosyasını kontrol edin.');
+  }
+
   const modelId = MODEL_MAP[modelKey] || MODEL_MAP['stable-diffusion'];
 
   try {
@@ -29,12 +33,10 @@ export async function generateImageFromHF(
       },
     }, { outputType: 'url' });
 
-    return result;
+    return result as unknown as string; // Result is a URL string when outputType is 'url'
   } catch (error) {
     console.error('HF Generation Error:', error);
-    // Fallback: generate a placeholder using a free API
-    const seed = Math.floor(Math.random() * 10000);
-    return `https://picsum.photos/seed/${seed}/1024/1024`;
+    throw error;
   }
 }
 
