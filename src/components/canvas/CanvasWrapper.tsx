@@ -28,9 +28,8 @@ const CanvasWrapper: React.FC = () => {
     const onMouseDown = (e: MouseEvent) => {
       if (e.button !== 0 && e.button !== 1) return;
       
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
-      const worldStart = engine.getMouseInWorldSpace(mouseX, mouseY);
+      const canvasSpace = engine.getMouseInCanvasSpace(e.clientX, e.clientY);
+      const worldStart = engine.getMouseInWorldSpace(e.clientX, e.clientY);
       startWorldPos = worldStart;
 
       // Handle Panning (Middle Mouse or Space+Left)
@@ -39,7 +38,7 @@ const CanvasWrapper: React.FC = () => {
         return;
       }
 
-      const hit = sceneGraph.getAssetAt(mouseX, mouseY, engine.transform);
+      const hit = sceneGraph.getAssetAt(canvasSpace.x, canvasSpace.y, engine.transform);
 
       if (activeTool === 'cursor') {
         if (hit) {
@@ -106,10 +105,16 @@ const CanvasWrapper: React.FC = () => {
           sceneGraph.notify();
         }
       } else if (interactionMode === 'marquee') {
-        const x1 = Math.min(e.clientX, startWorldPos.x * engine.transform.scale + engine.transform.x);
-        const y1 = Math.min(e.clientY, startWorldPos.y * engine.transform.scale + engine.transform.y);
-        const x2 = Math.max(e.clientX, startWorldPos.x * engine.transform.scale + engine.transform.x);
-        const y2 = Math.max(e.clientY, startWorldPos.y * engine.transform.scale + engine.transform.y);
+        const canvasSpace = engine.getMouseInCanvasSpace(e.clientX, e.clientY);
+        const startCanvasPos = {
+          x: startWorldPos.x * engine.transform.scale + engine.transform.x,
+          y: startWorldPos.y * engine.transform.scale + engine.transform.y
+        };
+
+        const x1 = Math.min(canvasSpace.x, startCanvasPos.x);
+        const y1 = Math.min(canvasSpace.y, startCanvasPos.y);
+        const x2 = Math.max(canvasSpace.x, startCanvasPos.x);
+        const y2 = Math.max(canvasSpace.y, startCanvasPos.y);
         
         setMarqueeRect({ x: x1, y: y1, w: x2 - x1, h: y2 - y1 });
         

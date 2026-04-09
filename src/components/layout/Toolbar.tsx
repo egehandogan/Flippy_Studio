@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Plus, 
   MousePointer2, 
@@ -69,7 +70,14 @@ const Toolbar: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center gap-1 p-1.5 bg-[#0D0D0D]/80 backdrop-blur-2xl border border-white/10 rounded-[24px] shadow-2xl z-50 select-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <motion.div 
+      drag
+      dragMomentum={false}
+      className="flex items-center gap-1 p-1.5 bg-[#0D0D0D]/80 backdrop-blur-2xl border border-white/10 rounded-[24px] shadow-2xl z-50 select-none cursor-default active:cursor-grabbing"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.01 }}
+    >
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -78,8 +86,8 @@ const Toolbar: React.FC = () => {
         onChange={handleFileChange}
       />
 
-      {/* Drag Handle (Visual only now, positioning is layout-driven) */}
-      <div className="w-6 h-10 flex items-center justify-center cursor-default text-white/20 border-r border-white/5 mr-1">
+      {/* Drag Handle */}
+      <div className="w-6 h-10 flex items-center justify-center cursor-grab active:cursor-grabbing text-white/20 hover:text-white/40 border-r border-white/5 mr-1">
         <GripVertical size={14} />
       </div>
 
@@ -152,7 +160,7 @@ const Toolbar: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

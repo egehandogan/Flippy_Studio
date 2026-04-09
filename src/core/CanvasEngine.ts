@@ -33,8 +33,9 @@ export class CanvasEngine {
       const delta = -e.deltaY * zoomSpeed;
       const newScale = Math.max(0.1, Math.min(10, this.transform.scale * (1 + delta)));
 
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
+      const rect = this.canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
       const worldX = (mouseX - this.transform.x) / this.transform.scale;
       const worldY = (mouseY - this.transform.y) / this.transform.scale;
 
@@ -124,10 +125,21 @@ export class CanvasEngine {
     }
   }
 
-  getMouseInWorldSpace(mouseX: number, mouseY: number) {
+  getMouseInWorldSpace(clientX: number, clientY: number) {
+    const rect = this.canvas.getBoundingClientRect();
+    const mouseX = clientX - rect.left;
+    const mouseY = clientY - rect.top;
     return {
       x: (mouseX - this.transform.x) / this.transform.scale,
       y: (mouseY - this.transform.y) / this.transform.scale
+    };
+  }
+
+  getMouseInCanvasSpace(clientX: number, clientY: number) {
+    const rect = this.canvas.getBoundingClientRect();
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
     };
   }
 
