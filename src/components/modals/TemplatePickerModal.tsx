@@ -87,7 +87,6 @@ const TemplatePickerModal: React.FC = () => {
                   <Check size={12} className="text-white" />
                 </div>
               )}
-              <div className="text-3xl group-hover:scale-110 transition-transform">{t.icon}</div>
               <div className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight">{t.name}</div>
             </div>
           ))}
