@@ -81,8 +81,8 @@ export class BridgeService {
     this.state.githubLink = githubLink;
     this.notify();
 
-    // Simulation
-    await new Promise(r => setTimeout(r, 3000));
+    // Simulation: 6 seconds to match the premium animation sequence
+    await new Promise(r => setTimeout(r, 6000));
 
     this.state.connectedEngine = this.state.pendingEngine;
     this.state.projectName = githubLink.split('/').pop() || 'Untitled Project';
