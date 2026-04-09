@@ -15,11 +15,16 @@ import {
   Brain,
 } from 'lucide-react';
 
-const PRESET_MODELS = [
-  { id: 'stable-diffusion', name: 'Stable Diffusion XL' },
-  { id: 'midjourney', name: 'OpenJourney v4' },
-  { id: 'imagine', name: 'RealVis XL' },
-  { id: 'playground', name: 'Playground v2.5' },
+const PREMIUM_MODELS = [
+  { id: 'stable-diffusion-xl', name: 'RealVis XL (Pro)' },
+  { id: 'midjourney-v4', name: 'OpenJourney v4 (Pro)' },
+  { id: 'playground-v2', name: 'Playground v2.5' },
+];
+
+const FREE_MODELS = [
+  { id: 'sd-15', name: 'Stable Diffusion 1.5' },
+  { id: 'openjourney-v1', name: 'OpenJourney v1' },
+  { id: 'pixel-art', name: 'Pixel Art Engine' },
 ];
 
 const GenerationPanel: React.FC = () => {
@@ -115,8 +120,15 @@ const GenerationPanel: React.FC = () => {
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="w-full appearance-none bg-[#111] border border-white/10 rounded-xl pl-9 pr-8 py-2.5 text-xs font-semibold text-white outline-none focus:border-purple-500/40 transition-all cursor-pointer [&_option]:bg-[#111] [&_option]:text-white [&_optgroup]:bg-[#111] [&_optgroup]:text-white/50"
               >
-                <optgroup label="AI Models">
-                  {PRESET_MODELS.map((m) => (
+                <optgroup label="Community (Free / High Availability)">
+                  {FREE_MODELS.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Studio (Requires Credits)">
+                  {PREMIUM_MODELS.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name}
                     </option>

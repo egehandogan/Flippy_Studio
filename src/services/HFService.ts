@@ -5,10 +5,14 @@ const HF_TOKEN = import.meta.env.VITE_HF_API_KEY || '';
 const hf = new HfInference(HF_TOKEN);
 
 const MODEL_MAP: Record<string, string> = {
-  'stable-diffusion': 'stabilityai/stable-diffusion-xl-base-1.0',
-  'midjourney': 'prompthero/openjourney-v4',
-  'imagine': 'SG161222/RealVisXL_V4.0',
-  'playground': 'playgroundai/playground-v2.5-1024px-aesthetic',
+  'stable-diffusion-xl': 'stabilityai/stable-diffusion-xl-base-1.0',
+  'midjourney-v4': 'prompthero/openjourney-v4',
+  'imagine-xl': 'SG161222/RealVisXL_V4.0',
+  'playground-v2': 'playgroundai/playground-v2.5-1024px-aesthetic',
+  // Truly Free / High Availability Models
+  'sd-15': 'runwayml/stable-diffusion-v1-5',
+  'openjourney-v1': 'prompthero/openjourney',
+  'pixel-art': 'nerijs/pixel-art-xl',
 };
 
 export async function generateImageFromHF(
@@ -20,7 +24,7 @@ export async function generateImageFromHF(
     throw new Error('AI API Anahtarı eksik. Lütfen .env dosyasını kontrol edin.');
   }
 
-  const modelId = MODEL_MAP[modelKey] || MODEL_MAP['stable-diffusion'];
+  const modelId = MODEL_MAP[modelKey] || MODEL_MAP['sd-15']; // Default to free SD 1.5 if key not found
 
   try {
     const result = await hf.textToImage({
@@ -31,11 +35,18 @@ export async function generateImageFromHF(
         width: 1024,
         height: 1024,
       },
-    }, { outputType: 'url' });
+    }, { outputType: 'blob' });
 
-    return result as unknown as string; // Result is a URL string when outputType is 'url'
-  } catch (error) {
+    // Blob tipindeki sonucu yerel bir URL'e dönüştürüyoruz
+    return URL.createObjectURL(result as Blob);
+  } catch (error: any) {
     console.error('HF Generation Error:', error);
+    
+    // Daha açıklayıcı hata mesajları
+    if (error.message?.includes('No Inference Provider')) {
+      throw new Error(`Seçili model (${modelId}) şu an müsait değil. Lütfen 'Community' grubundaki ücretsiz modelleri deneyin.`);
+    }
+    
     throw error;
   }
 }
