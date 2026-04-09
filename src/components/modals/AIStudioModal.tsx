@@ -168,7 +168,7 @@ const AIStudioModal: React.FC<AIStudioModalProps> = ({ isOpen, onClose }) => {
                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     className="h-full"
                   >
-                    <GenerationPanel />
+                    <GenerationPanel onClose={onClose} />
                   </motion.div>
                 )}
               </AnimatePresence>

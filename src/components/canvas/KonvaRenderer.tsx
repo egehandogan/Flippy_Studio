@@ -7,17 +7,46 @@ import { useCanvasEvents } from '../../hooks/useCanvasEvents';
 
 const ImageAsset: React.FC<{ asset: Asset; commonProps: Record<string, unknown> }> = ({ asset, commonProps }) => {
   const [image, setImage] = React.useState<HTMLImageElement | null>(null);
+  const [error, setError] = React.useState(false);
 
   useEffect(() => {
     if (asset.properties.src) {
       const img = new window.Image();
-      img.crossOrigin = 'anonymous';
+      // Try with crossOrigin for external providers, but allow fallback
+      if (asset.properties.src.startsWith('http')) {
+        img.crossOrigin = 'anonymous';
+      }
+      
       img.src = asset.properties.src;
-      img.onload = () => setImage(img);
+      img.onload = () => {
+        setImage(img);
+        setError(false);
+      };
+      img.onerror = () => {
+        console.error('Image load failed:', asset.properties.src);
+        setError(true);
+      };
     }
   }, [asset.properties.src]);
 
-  if (!image) return null;
+  if (error) {
+    return (
+      <Group {...commonProps}>
+        <Rect width={asset.width} height={asset.height} fill="#FF000020" stroke="#FF0000" strokeWidth={1} />
+        <Text text="Image Load Failed (CORS?)" fontSize={10} fill="#FF4444" align="center" verticalAlign="middle" width={asset.width} height={asset.height} />
+      </Group>
+    );
+  }
+
+  if (!image) {
+    return (
+      <Group {...commonProps}>
+        <Rect width={asset.width} height={asset.height} fill="#FFFFFF05" stroke="#FFFFFF10" strokeWidth={1} />
+        <Text text="Loading..." fontSize={10} fill="#FFFFFF40" align="center" verticalAlign="middle" width={asset.width} height={asset.height} />
+      </Group>
+    );
+  }
+  
   return <KonvaImage {...commonProps} image={image} />;
 };
 

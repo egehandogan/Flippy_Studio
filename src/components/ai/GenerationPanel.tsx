@@ -29,7 +29,11 @@ const FREE_MODELS = [
   { id: 'pixel-art', name: 'Pixel Art Engine' },
 ];
 
-const GenerationPanel: React.FC = () => {
+interface GenerationPanelProps {
+  onClose?: () => void;
+}
+
+const GenerationPanel: React.FC<GenerationPanelProps> = ({ onClose }) => {
   const {
     selectedModel,
     prompt,
@@ -107,6 +111,7 @@ const GenerationPanel: React.FC = () => {
     };
     addAsset(asset);
     selectAssets([id]);
+    if (onClose) onClose();
   };
 
   const handleExport = (url: string) => {
