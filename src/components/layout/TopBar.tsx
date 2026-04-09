@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Search, Sparkles, Menu, Bell } from 'lucide-react';
+import { Search, Sparkles, Bell } from 'lucide-react';
 import { UserButton } from '@clerk/clerk-react';
 import AIStudioModal from '../modals/AIStudioModal';
 import SubscriptionModal from '../modals/SubscriptionModal';
+import AdvancedMenu from './AdvancedMenu';
 
 const TopBar: React.FC = () => {
   const [isAIOpen, setIsAIOpen] = useState(false);
@@ -18,9 +19,7 @@ const TopBar: React.FC = () => {
             </div>
             <span className="text-[15px] font-black tracking-tighter text-white">Flippy</span>
           </div>
-          <button className="p-2 hover:bg-white/5 rounded-xl text-white/40 transition-all">
-            <Menu size={20} />
-          </button>
+           <AdvancedMenu />
         </div>
 
         <div className="flex-1 max-w-xl mx-8">
