@@ -4,6 +4,7 @@ import { useAIStore } from '../../store/useAIStore';
 import { useSceneStore, type Asset } from '../../store/useSceneStore';
 import { useEditorStore } from '../../store/useEditorStore';
 import { generateImageFromHF } from '../../services/HFService';
+import { generateImageFromPollinations, POLLINATIONS_MODELS } from '../../services/PollinationsService';
 import {
   Sparkles,
   ChevronDown,
@@ -13,6 +14,7 @@ import {
   RefreshCw,
   Loader2,
   Brain,
+  Zap,
 } from 'lucide-react';
 
 const PREMIUM_MODELS = [
@@ -42,6 +44,8 @@ const GenerationPanel: React.FC = () => {
     setStyleDetails,
     setIsGenerating,
     addGeneratedImage,
+    activeProvider,
+    setProvider,
   } = useAIStore();
 
   const [error, setError] = React.useState<string | null>(null);
@@ -58,7 +62,14 @@ const GenerationPanel: React.FC = () => {
     try {
       setError(null);
       const fullPrompt = styleDetails.trim() ? `${prompt}, ${styleDetails}` : prompt;
-      const url = await generateImageFromHF(fullPrompt, negativePrompt, selectedModel);
+      
+      let url = '';
+      if (activeProvider === 'huggingface') {
+        url = await generateImageFromHF(fullPrompt, negativePrompt, selectedModel);
+      } else {
+        url = await generateImageFromPollinations(fullPrompt, selectedModel);
+      }
+
       addGeneratedImage({
         id: crypto.randomUUID(),
         url,
@@ -110,30 +121,63 @@ const GenerationPanel: React.FC = () => {
       {/* Left: Controls */}
       <div className="w-80 border-r border-white/5 flex flex-col bg-black/20">
         <div className="p-4 border-b border-white/5 space-y-4">
+          {/* Provider Selector */}
+          <div className="space-y-1.5">
+             <label className="text-[9px] font-black uppercase tracking-widest text-white/30">AI Engine</label>
+             <div className="flex p-1 bg-[#111] border border-white/5 rounded-xl">
+               <button 
+                 onClick={() => setProvider('pollinations')}
+                 className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold transition-all ${activeProvider === 'pollinations' ? 'bg-white/10 text-white' : 'text-white/20 hover:text-white/40'}`}
+               >
+                 <Zap size={12} className={activeProvider === 'pollinations' ? 'text-yellow-400' : ''} />
+                 Pollination
+               </button>
+               <button 
+                 onClick={() => setProvider('huggingface')}
+                 className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold transition-all ${activeProvider === 'huggingface' ? 'bg-white/10 text-white' : 'text-white/20 hover:text-white/40'}`}
+               >
+                 <Brain size={12} className={activeProvider === 'huggingface' ? 'text-purple-400' : ''} />
+                 HF Forge
+               </button>
+             </div>
+          </div>
+
           {/* Model Selector */}
           <div className="space-y-1.5">
             <label className="text-[9px] font-black uppercase tracking-widest text-white/30">Model</label>
             <div className="relative">
-              <Brain size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400" />
+              {activeProvider === 'pollinations' ? <Zap size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-400" /> : <Brain size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400" />}
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="w-full appearance-none bg-[#111] border border-white/10 rounded-xl pl-9 pr-8 py-2.5 text-xs font-semibold text-white outline-none focus:border-purple-500/40 transition-all cursor-pointer [&_option]:bg-[#111] [&_option]:text-white [&_optgroup]:bg-[#111] [&_optgroup]:text-white/50"
               >
-                <optgroup label="Community (Free / High Availability)">
-                  {FREE_MODELS.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="Studio (Requires Credits)">
-                  {PREMIUM_MODELS.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </optgroup>
+                {activeProvider === 'pollinations' ? (
+                  <optgroup label="Fast Generation">
+                    {POLLINATIONS_MODELS.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ) : (
+                  <>
+                  <optgroup label="Community (Free / High Availability)">
+                    {FREE_MODELS.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Studio (Requires Credits)">
+                    {PREMIUM_MODELS.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                  </>
+                )}
                 {trainedModels.length > 0 && (
                   <optgroup label="Your Models">
                     {trainedModels.map((f) => (
@@ -162,11 +206,11 @@ const GenerationPanel: React.FC = () => {
 
           {/* Negative Prompt */}
           <div className="space-y-1.5">
-            <label className="text-[9px] font-black uppercase tracking-widest text-white/30">Negative Prompt</label>
+            <label className="text-[9px] font-black uppercase tracking-widest text-white/30">{activeProvider === 'pollinations' ? 'Focus Style' : 'Negative Prompt'}</label>
             <textarea
               value={negativePrompt}
               onChange={(e) => setNegativePrompt(e.target.value)}
-              placeholder="What to avoid..."
+              placeholder={activeProvider === 'pollinations' ? 'Enter focus style details...' : 'What to avoid...'}
               rows={2}
               className="w-full bg-white/5 border border-white/5 rounded-xl p-3 text-xs text-white/80 placeholder:text-white/15 outline-none focus:border-red-500/20 resize-none transition-all"
             />

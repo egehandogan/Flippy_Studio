@@ -23,6 +23,7 @@ export interface GeneratedImage {
 
 export type TrainingStatus = 'idle' | 'training' | 'success' | 'error';
 export type AIView = 'home' | 'train' | 'generate';
+export type AIProvider = 'huggingface' | 'pollinations';
 
 interface AIState {
   // Navigation
@@ -53,12 +54,14 @@ interface AIState {
   styleDetails: string;
   isGenerating: boolean;
   generatedImages: GeneratedImage[];
+  activeProvider: AIProvider;
 
   setSelectedModel: (model: string) => void;
   setPrompt: (prompt: string) => void;
   setNegativePrompt: (negativePrompt: string) => void;
   setStyleDetails: (styleDetails: string) => void;
   setIsGenerating: (isGenerating: boolean) => void;
+  setProvider: (provider: AIProvider) => void;
   addGeneratedImage: (image: GeneratedImage) => void;
   removeGeneratedImage: (id: string) => void;
 
@@ -150,12 +153,14 @@ export const useAIStore = create<AIState>((set, get) => ({
   styleDetails: '',
   isGenerating: false,
   generatedImages: [],
+  activeProvider: 'pollinations',
 
   setSelectedModel: (selectedModel) => set({ selectedModel }),
   setPrompt: (prompt) => set({ prompt }),
   setNegativePrompt: (negativePrompt) => set({ negativePrompt }),
   setStyleDetails: (styleDetails) => set({ styleDetails }),
   setIsGenerating: (isGenerating) => set({ isGenerating }),
+  setProvider: (activeProvider) => set({ activeProvider, selectedModel: activeProvider === 'pollinations' ? 'flux' : 'sd-15' }),
   addGeneratedImage: (image) =>
     set((state) => ({ generatedImages: [image, ...state.generatedImages] })),
   removeGeneratedImage: (id) =>
