@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSceneStore } from '../../store/useSceneStore';
 import { 
   Square, 
@@ -17,6 +17,7 @@ import {
   Bold,
   Italic
 } from 'lucide-react';
+import ColorPicker from '../shared/ColorPicker';
 
 const PropertyGroup: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div className="py-4 border-b border-white/5 space-y-3">
@@ -46,6 +47,7 @@ const Input = ({ label, value, onChange, type = "text", icon: Icon }: any) => (
 const RightSidebar: React.FC = () => {
   const { assets, selectedIds, updateAsset } = useSceneStore();
   const selectedAsset = assets.find(a => selectedIds.includes(a.id));
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
   if (!selectedAsset) {
     return (
@@ -58,7 +60,8 @@ const RightSidebar: React.FC = () => {
     );
   }
 
-  const handlePropChange = (key: string, value: any) => {
+
+  const handlePropChange = (key: string, value: string | number) => {
     updateAsset(selectedAsset.id, {
       properties: { ...selectedAsset.properties, [key]: value }
     });
@@ -166,23 +169,33 @@ const RightSidebar: React.FC = () => {
         {/* Appearance Group */}
         <PropertyGroup label="Appearance">
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
+            <div className="relative">
               <div 
+                onClick={() => setShowColorPicker(!showColorPicker)}
                 className="w-full h-9 rounded-lg border border-white/10 flex items-center px-3 gap-3 bg-white/5 hover:bg-white/10 transition-all cursor-pointer overflow-hidden"
               >
                 <div 
                   className="w-4 h-4 rounded-sm border border-white/20 shrink-0" 
                   style={{ backgroundColor: selectedAsset.properties.fill || '#FFFFFF' }}
                 />
-                <input 
-                  type="text" 
-                  value={selectedAsset.properties.fill || '#FFFFFF'} 
-                  onChange={(e) => handlePropChange('fill', e.target.value)}
-                  className="bg-transparent text-[11px] text-white outline-none w-full font-mono font-bold"
-                />
+                <span className="text-[11px] text-white font-mono font-bold">
+                  {(selectedAsset.properties.fill || '#FFFFFF').toUpperCase()}
+                </span>
               </div>
+              
+              {showColorPicker && (
+                <div className="absolute right-0 top-11 z-[300]">
+                  <ColorPicker
+                    color={selectedAsset.properties.fill || '#FFFFFF'}
+                    opacity={selectedAsset.properties.opacity ?? 100}
+                    onChange={(c) => handlePropChange('fill', c)}
+                    onOpacityChange={(o) => handlePropChange('opacity', o)}
+                    onClose={() => setShowColorPicker(false)}
+                  />
+                </div>
+              )}
             </div>
-            <Input label="Opacity %" type="number" value={selectedAsset.properties.opacity || 100} onChange={(v: any) => handlePropChange('opacity', Math.min(100, Math.max(0, parseInt(v) || 0)))} />
+            <Input label="Opacity %" type="number" value={selectedAsset.properties.opacity || 100} onChange={(v: string) => handlePropChange('opacity', Math.min(100, Math.max(0, parseInt(v) || 0)))} />
           </div>
         </PropertyGroup>
       </div>
