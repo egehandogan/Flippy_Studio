@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Search, Sparkles, Menu, Bell } from 'lucide-react';
 import { UserButton } from '@clerk/clerk-react';
 import AIStudioModal from '../modals/AIStudioModal';
+import SubscriptionModal from '../modals/SubscriptionModal';
 
 const TopBar: React.FC = () => {
   const [isAIOpen, setIsAIOpen] = useState(false);
+  const [isSubOpen, setIsSubOpen] = useState(false);
 
   return (
     <>
@@ -33,9 +35,17 @@ const TopBar: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-white/[0.02] border border-white/5 rounded-full">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
-            <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Auto Save in 5m</span>
+          <div className="hidden lg:flex items-center gap-4 px-3 py-1 bg-white/[0.02] border border-white/5 rounded-full">
+            <div className="flex items-center gap-2 pr-3 border-r border-white/5">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+              <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Auto Save</span>
+            </div>
+            <button 
+              onClick={() => setIsSubOpen(true)}
+              className="px-2 py-1 text-[10px] font-black text-flippy-blue hover:text-white transition-colors uppercase tracking-widest"
+            >
+              Plans
+            </button>
           </div>
 
           <button 
@@ -61,6 +71,9 @@ const TopBar: React.FC = () => {
 
       {/* AI Studio Modal */}
       <AIStudioModal isOpen={isAIOpen} onClose={() => setIsAIOpen(false)} />
+      
+      {/* Subscription Modal */}
+      <SubscriptionModal isOpen={isSubOpen} onClose={() => setIsSubOpen(false)} />
     </>
   );
 };
