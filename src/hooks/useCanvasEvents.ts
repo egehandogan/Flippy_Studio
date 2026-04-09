@@ -5,6 +5,8 @@ import Konva from 'konva';
 
 export const useCanvasEvents = (stageRef: React.RefObject<Konva.Stage | null>) => {
   const activeTool = useEditorStore((state) => state.activeTool);
+  const editingTextId = useEditorStore((state) => state.editingTextId);
+  const setEditingTextId = useEditorStore((state) => state.setEditingTextId);
   const addAsset = useSceneStore((state) => state.addAsset);
   const updateAsset = useSceneStore((state) => state.updateAsset);
   const selectAssets = useSceneStore((state) => state.selectAssets);
@@ -26,6 +28,7 @@ export const useCanvasEvents = (stageRef: React.RefObject<Konva.Stage | null>) =
   }, [stageRef]);
 
   const handleMouseDown = useCallback(() => {
+    if (editingTextId) return;
     if (activeTool === 'cursor' || activeTool === 'pan') return;
 
     const pos = getRelativePointerPosition();
@@ -49,31 +52,42 @@ export const useCanvasEvents = (stageRef: React.RefObject<Konva.Stage | null>) =
         locked: false,
         parentId: null,
         properties: {
-          fill: '#FFFFFF',
+          fill: activeTool === 'text' ? '#FFFFFF' : '#333333',
           stroke: '#0095FF',
           strokeWidth: 2,
           opacity: 100,
           text: activeTool === 'text' ? 'Type something...' : undefined,
           fontSize: activeTool === 'text' ? 24 : undefined,
+          fontFamily: activeTool === 'text' ? 'Inter, sans-serif' : undefined,
         }
       };
       
       addAsset(newAsset);
       selectAssets([id]);
-    }
-  }, [activeTool, addAsset, selectAssets, getRelativePointerPosition]);
 
-  const handleMouseMove = useCallback(() => {
+      // If text tool, immediately start editing on mouse up OR dbl click logic
+      // For Figma style, single click with text tool creates and starts editing
+    }
+  }, [activeTool, editingTextId, addAsset, selectAssets, getRelativePointerPosition]);
+
+  const handleMouseMove = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
     if (!isDrawing.current || !currentAssetId.current) return;
 
     const pos = getRelativePointerPosition();
-    const dx = pos.x - startPos.current.x;
-    const dy = pos.y - startPos.current.y;
+    let dx = pos.x - startPos.current.x;
+    let dy = pos.y - startPos.current.y;
+
+    // Shift + Draw: Proportional (1:1)
+    if (e.evt && e.evt.shiftKey && activeTool !== 'text') {
+      const size = Math.max(Math.abs(dx), Math.abs(dy));
+      dx = dx > 0 ? size : -size;
+      dy = dy > 0 ? size : -size;
+    }
 
     if (['rect', 'circle'].includes(activeTool)) {
       updateAsset(currentAssetId.current, {
-        x: dx > 0 ? startPos.current.x : pos.x,
-        y: dy > 0 ? startPos.current.y : pos.y,
+        x: dx > 0 ? startPos.current.x : startPos.current.x + dx,
+        y: dy > 0 ? startPos.current.y : startPos.current.y + dy,
         width: Math.max(5, Math.abs(dx)),
         height: Math.max(5, Math.abs(dy)),
       });
@@ -81,9 +95,12 @@ export const useCanvasEvents = (stageRef: React.RefObject<Konva.Stage | null>) =
   }, [activeTool, updateAsset, getRelativePointerPosition]);
 
   const handleMouseUp = useCallback(() => {
+    if (activeTool === 'text' && currentAssetId.current) {
+      setEditingTextId(currentAssetId.current);
+    }
     isDrawing.current = false;
     currentAssetId.current = null;
-  }, []);
+  }, [activeTool, setEditingTextId]);
 
   return {
     handleMouseDown,

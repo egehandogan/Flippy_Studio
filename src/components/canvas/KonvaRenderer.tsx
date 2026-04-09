@@ -7,6 +7,12 @@ import { useCanvasEvents } from '../../hooks/useCanvasEvents';
 
 const AssetComponent: React.FC<{ asset: Asset }> = ({ asset }) => {
   const updateAsset = useSceneStore((state) => state.updateAsset);
+  const editingTextId = useEditorStore((state) => state.editingTextId);
+  const setEditingTextId = useEditorStore((state) => state.setEditingTextId);
+  const activeTool = useEditorStore((state) => state.activeTool);
+  
+  // Track initial drag position for axis locking
+  const dragStartPos = useRef({ x: 0, y: 0 });
 
   const commonProps = {
     id: asset.id,
@@ -16,9 +22,25 @@ const AssetComponent: React.FC<{ asset: Asset }> = ({ asset }) => {
     width: asset.width,
     height: asset.height,
     rotation: asset.rotation,
-    draggable: !asset.locked,
-    visible: asset.visible,
+    draggable: !asset.locked && editingTextId !== asset.id,
+    visible: asset.visible && editingTextId !== asset.id, // Hide while editing text
     opacity: (asset.properties.opacity ?? 100) / 100,
+    onDragStart: (e: Konva.KonvaEventObject<DragEvent>) => {
+      dragStartPos.current = { x: e.target.x(), y: e.target.y() };
+    },
+    onDragMove: (e: Konva.KonvaEventObject<DragEvent>) => {
+      // Shift + Move: Axis Locking
+      if (e.evt && e.evt.shiftKey) {
+        const dx = Math.abs(e.target.x() - dragStartPos.current.x);
+        const dy = Math.abs(e.target.y() - dragStartPos.current.y);
+        
+        if (dx > dy) {
+          e.target.y(dragStartPos.current.y);
+        } else {
+          e.target.x(dragStartPos.current.x);
+        }
+      }
+    },
     onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => {
       updateAsset(asset.id, { x: e.target.x(), y: e.target.y() });
     },
@@ -34,6 +56,16 @@ const AssetComponent: React.FC<{ asset: Asset }> = ({ asset }) => {
       node.scaleX(1);
       node.scaleY(1);
     },
+    onDblClick: () => {
+      if (asset.type === 'text') {
+        setEditingTextId(asset.id);
+      }
+    },
+    onClick: () => {
+      if (activeTool === 'text' && asset.type === 'text') {
+        setEditingTextId(asset.id);
+      }
+    }
   };
 
   switch (asset.type) {
@@ -66,8 +98,11 @@ const AssetComponent: React.FC<{ asset: Asset }> = ({ asset }) => {
           {...commonProps}
           text={asset.properties.text || 'Type...'}
           fontSize={asset.properties.fontSize || 16}
+          fontFamily={asset.properties.fontFamily || 'Inter, sans-serif'}
+          fontWeight={asset.properties.fontWeight as any || 'normal'}
           fill={asset.properties.fill}
-          fontFamily="Inter, sans-serif"
+          align={asset.properties.textAlign as any || 'left'}
+          lineHeight={asset.properties.lineHeight || 1.2}
         />
       );
     default:
@@ -83,6 +118,7 @@ const KonvaRenderer: React.FC = () => {
   const panning = useEditorStore((state) => state.panning);
   const setPanning = useEditorStore((state) => state.setPanning);
   const activeTool = useEditorStore((state) => state.activeTool);
+  const editingTextId = useEditorStore((state) => state.editingTextId);
 
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -101,6 +137,8 @@ const KonvaRenderer: React.FC = () => {
   }, [selectedIds, assets]);
 
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    if (editingTextId) return; // Don't handle clicks if editing text
+
     onDrawingStart();
 
     if (activeTool !== 'cursor' && activeTool !== 'pan') return;
@@ -128,7 +166,7 @@ const KonvaRenderer: React.FC = () => {
       scaleY={zoom}
       x={panning.x}
       y={panning.y}
-      draggable={activeTool === 'pan'}
+      draggable={activeTool === 'pan' && !editingTextId}
       onDragEnd={(e) => {
         if (activeTool === 'pan') {
           setPanning({ x: e.target.x(), y: e.target.y() });
@@ -140,16 +178,20 @@ const KonvaRenderer: React.FC = () => {
         {assets.map((asset) => (
           <AssetComponent key={asset.id} asset={asset} />
         ))}
-        {selectedIds.length > 0 && (
+        {selectedIds.length > 0 && activeTool === 'cursor' && (
           <Transformer
             ref={transformerRef}
-            rotateEnabled={activeTool === 'cursor'}
-            resizeEnabled={activeTool === 'cursor'}
+            rotateEnabled={true}
+            resizeEnabled={true}
             anchorSize={8}
             anchorCornerRadius={2}
             anchorStroke="#0095FF"
             borderStroke="#0095FF"
             anchorFill="white"
+            rotationSnaps={[0, 45, 90, 135, 180, 225, 270, 315]}
+            rotateAnchorOffset={20}
+            // Konva handles Shift key automatically for aspect ratio if properly configured
+            // but we ensure rotation snaps are enabled.
             boundBoxFunc={(oldBox, newBox) => {
               if (newBox.width < 5 || newBox.height < 5) return oldBox;
               return newBox;

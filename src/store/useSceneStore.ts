@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { temporal } from 'zundo';
 
 export type AssetType = 'rect' | 'circle' | 'text' | 'image' | 'path' | 'comment' | 'frame';
 
@@ -21,6 +22,11 @@ export interface Asset {
     cornerRadius?: number;
     text?: string;
     fontSize?: number;
+    fontWeight?: string | number;
+    fontFamily?: string;
+    fontStyle?: string;
+    textAlign?: string;
+    lineHeight?: number;
     opacity?: number;
     src?: string;
     pathPoints?: { x: number; y: number; cx1?: number; cy1?: number; cx2?: number; cy2?: number }[];
@@ -37,40 +43,51 @@ interface SceneState {
   addAsset: (asset: Asset) => void;
   updateAsset: (id: string, updates: Partial<Asset>) => void;
   removeAsset: (id: string) => void;
+  removeAssets: (ids: string[]) => void;
   selectAssets: (ids: string[]) => void;
   clearSelection: () => void;
   setPageColor: (color: string) => void;
   reorderAssets: (from: number, to: number) => void;
 }
 
-export const useSceneStore = create<SceneState>((set) => ({
-  assets: [],
-  selectedIds: [],
-  pageColor: '#1E1E1E',
+export const useSceneStore = create<SceneState>()(
+  temporal((set) => ({
+    assets: [],
+    selectedIds: [],
+    pageColor: '#1E1E1E',
 
-  addAsset: (asset) => set((state) => ({ 
-    assets: [...state.assets, asset] 
-  })),
+    addAsset: (asset) => set((state) => ({ 
+      assets: [...state.assets, asset] 
+    })),
 
-  updateAsset: (id, updates) => set((state) => ({
-    assets: state.assets.map((a) => (a.id === id ? { ...a, ...updates } : a))
-  })),
+    updateAsset: (id, updates) => set((state) => ({
+      assets: state.assets.map((a) => (a.id === id ? { ...a, ...updates } : a))
+    })),
 
-  removeAsset: (id) => set((state) => ({
-    assets: state.assets.filter((a) => a.id !== id && a.parentId !== id),
-    selectedIds: state.selectedIds.filter((sid) => sid !== id)
-  })),
+    removeAsset: (id) => set((state) => ({
+      assets: state.assets.filter((a) => a.id !== id && a.parentId !== id),
+      selectedIds: state.selectedIds.filter((sid) => sid !== id)
+    })),
 
-  selectAssets: (selectedIds) => set({ selectedIds }),
-  
-  clearSelection: () => set({ selectedIds: [] }),
+    removeAssets: (ids) => set((state) => ({
+      assets: state.assets.filter((a) => !ids.includes(a.id)),
+      selectedIds: state.selectedIds.filter((sid) => !ids.includes(sid))
+    })),
 
-  setPageColor: (pageColor) => set({ pageColor }),
+    selectAssets: (selectedIds) => set({ selectedIds }),
+    
+    clearSelection: () => set({ selectedIds: [] }),
 
-  reorderAssets: (from, to) => set((state) => {
-    const newAssets = [...state.assets];
-    const [removed] = newAssets.splice(from, 1);
-    newAssets.splice(to, 0, removed);
-    return { assets: newAssets };
-  }),
-}));
+    setPageColor: (pageColor) => set({ pageColor }),
+
+    reorderAssets: (from, to) => set((state) => {
+      const newAssets = [...state.assets];
+      const [removed] = newAssets.splice(from, 1);
+      newAssets.splice(to, 0, removed);
+      return { assets: newAssets };
+    }),
+  }), {
+    // Only track assets for undo/redo
+    partialize: (state) => ({ assets: state.assets }),
+  })
+);
