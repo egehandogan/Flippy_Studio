@@ -292,7 +292,6 @@ const KonvaRenderer: React.FC = () => {
           setPanning({ x: e.target.x(), y: e.target.y() });
         }
       }}
-      className="bg-[#0A0A0A]"
     >
       <Layer>
         {renderAssets(null)}

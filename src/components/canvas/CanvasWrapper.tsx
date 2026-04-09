@@ -1,5 +1,6 @@
 import React from 'react';
 import KonvaRenderer from './KonvaRenderer';
+import GridBackground from './GridBackground';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import TextEditorOverlay from './TextEditorOverlay';
 
@@ -8,7 +9,10 @@ const CanvasWrapper: React.FC = () => {
   useKeyboardShortcuts();
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-[#0A0A0A]">
+    <div className="relative w-full h-full overflow-hidden bg-[#1E1E1E]">
+      {/* Dynamic Infinite Grid */}
+      <GridBackground />
+
       {/* The main Konva Stage */}
       <KonvaRenderer />
 
