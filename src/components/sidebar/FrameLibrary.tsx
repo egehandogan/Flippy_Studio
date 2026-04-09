@@ -158,10 +158,30 @@ const FrameLibrary: React.FC = () => {
 
   const handleAddFrame = (name: string, width: number, height: number, wireframeType?: string) => {
     const frameId = crypto.randomUUID();
+    const assets = useSceneStore.getState().assets;
     
-    // Position at center of viewport
-    const cx = (window.innerWidth / 2 - panning.x) / zoom - width / 2;
-    const cy = (window.innerHeight / 2 - panning.y) / zoom - height / 2;
+    // Calculate smart position to avoid overlap (Grid layout)
+    // Find all top-level frames to calculate the next position
+    const topLevelFrames = assets.filter(a => a.type === 'frame' && a.parentId === null);
+    
+    let cx, cy;
+    
+    if (topLevelFrames.length === 0) {
+      // First frame goes to center of viewport
+      cx = (window.innerWidth / 2 - panning.x) / zoom - width / 2;
+      cy = (window.innerHeight / 2 - panning.y) / zoom - height / 2;
+    } else {
+      // Find the rightmost frame
+      const rightmost = topLevelFrames.reduce((max, f) => {
+        const right = f.x + f.width;
+        return right > max ? right : max;
+      }, -Infinity);
+      
+      // Place it to the right with a 100px gap
+      cx = rightmost + 100;
+      // Keep the same Y as the first frame for horizontal alignment
+      cy = topLevelFrames[0].y;
+    }
 
     const frame: Asset = {
       id: frameId,
