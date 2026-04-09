@@ -13,7 +13,8 @@ import {
   Hand, 
   MessageSquare, 
   GripVertical,
-  Download
+  Download,
+  Frame
 } from 'lucide-react';
 import { useEditorStore, type ToolType } from '../../store/useEditorStore';
 import { useSceneStore } from '../../store/useSceneStore';
@@ -102,6 +103,7 @@ const Toolbar: React.FC = () => {
   const tools: { id: ToolType; icon: React.ReactNode; label: string; shortcut?: string }[] = [
     { id: 'add', icon: <Plus size={18} />, label: 'Importer' },
     { id: 'cursor', icon: <MousePointer2 size={18} />, label: 'Select', shortcut: 'V' },
+    { id: 'frame', icon: <Frame size={18} />, label: 'Frame', shortcut: 'F' },
     { id: 'rect', icon: <Square size={18} />, label: 'Rectangle', shortcut: 'R' },
     { id: 'circle', icon: <Circle size={18} />, label: 'Ellipse', shortcut: 'O' },
     { id: 'text', icon: <Type size={18} />, label: 'Text', shortcut: 'T' },

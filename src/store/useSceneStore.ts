@@ -29,6 +29,7 @@ export interface Asset {
     lineHeight?: number;
     opacity?: number;
     src?: string;
+    clipContent?: boolean;
     pathPoints?: { x: number; y: number; cx1?: number; cy1?: number; cx2?: number; cy2?: number }[];
     [key: string]: any;
   };

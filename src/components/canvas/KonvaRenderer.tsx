@@ -1,11 +1,10 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import { Stage, Layer, Rect, Ellipse, Text, Transformer, Image as KonvaImage } from 'react-konva';
+import { Stage, Layer, Rect, Ellipse, Text, Transformer, Image as KonvaImage, Group } from 'react-konva';
 import Konva from 'konva';
 import { useSceneStore, type Asset } from '../../store/useSceneStore';
 import { useEditorStore } from '../../store/useEditorStore';
 import { useCanvasEvents } from '../../hooks/useCanvasEvents';
 
-// Component to render Image assets using Konva.Image
 const ImageAsset: React.FC<{ asset: Asset; commonProps: Record<string, unknown> }> = ({ asset, commonProps }) => {
   const [image, setImage] = React.useState<HTMLImageElement | null>(null);
 
@@ -22,7 +21,7 @@ const ImageAsset: React.FC<{ asset: Asset; commonProps: Record<string, unknown> 
   return <KonvaImage {...commonProps} image={image} />;
 };
 
-const AssetComponent: React.FC<{ asset: Asset }> = ({ asset }) => {
+const AssetComponent: React.FC<{ asset: Asset; childrenAssets?: Asset[] }> = ({ asset, childrenAssets = [] }) => {
   const updateAsset = useSceneStore((state) => state.updateAsset);
   const editingTextId = useEditorStore((state) => state.editingTextId);
   const setEditingTextId = useEditorStore((state) => state.setEditingTextId);
@@ -76,6 +75,41 @@ const AssetComponent: React.FC<{ asset: Asset }> = ({ asset }) => {
   };
 
   switch (asset.type) {
+    case 'frame':
+      return (
+        <Group
+          {...commonProps}
+          clipX={0}
+          clipY={0}
+          clipWidth={asset.properties.clipContent ? asset.width : undefined}
+          clipHeight={asset.properties.clipContent ? asset.height : undefined}
+        >
+          {/* Frame Background */}
+          <Rect
+            x={0}
+            y={0}
+            width={asset.width}
+            height={asset.height}
+            fill={asset.properties.fill}
+            stroke={asset.properties.stroke}
+            strokeWidth={asset.properties.strokeWidth}
+            cornerRadius={asset.properties.cornerRadius}
+          />
+          {/* Text Title for Frame */}
+          <Text 
+            text={asset.name} 
+            y={-15} 
+            fontSize={10} 
+            fill="#FFFFFF40" 
+            fontStyle="bold"
+            listening={false}
+          />
+          {/* Children Assets */}
+          {childrenAssets.map(child => (
+            <AssetComponent key={child.id} asset={child} />
+          ))}
+        </Group>
+      );
     case 'rect':
       return (
         <Rect
@@ -106,9 +140,9 @@ const AssetComponent: React.FC<{ asset: Asset }> = ({ asset }) => {
           text={asset.properties.text || 'Type...'}
           fontSize={asset.properties.fontSize || 16}
           fontFamily={asset.properties.fontFamily || 'Inter, sans-serif'}
-          fontWeight={asset.properties.fontWeight as string || 'normal'}
+          fontWeight={asset.properties.fontWeight as any || 'normal'}
           fill={asset.properties.fill}
-          align={asset.properties.textAlign as string || 'left'}
+          align={asset.properties.textAlign as any || 'left'}
           lineHeight={asset.properties.lineHeight || 1.2}
         />
       );
@@ -148,7 +182,6 @@ const KonvaRenderer: React.FC = () => {
     }
   }, [selectedIds, assets]);
 
-  // ── Scroll to Zoom ──
   const handleWheel = useCallback((e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
     const stage = stageRef.current;
@@ -162,7 +195,6 @@ const KonvaRenderer: React.FC = () => {
     const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
     const clampedScale = Math.max(0.05, Math.min(20, newScale));
 
-    // Zoom toward pointer position
     const mousePointTo = {
       x: (pointer.x - panning.x) / oldScale,
       y: (pointer.y - panning.y) / oldScale,
@@ -177,9 +209,7 @@ const KonvaRenderer: React.FC = () => {
     setPanning(newPos);
   }, [zoom, panning, setZoom, setPanning]);
 
-  // ── Middle Mouse Panning ──
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    // Middle mouse button (button === 1)
     if (e.evt.button === 1) {
       e.evt.preventDefault();
       isMiddleMousePanning.current = true;
@@ -222,6 +252,16 @@ const KonvaRenderer: React.FC = () => {
     onDrawingEnd();
   };
 
+  // Helper to render assets hierarchically
+  const renderAssets = (parentId: string | null = null) => {
+    return assets
+      .filter(a => a.parentId === parentId)
+      .map(asset => {
+        const children = assets.filter(child => child.parentId === asset.id);
+        return <AssetComponent key={asset.id} asset={asset} childrenAssets={children} />;
+      });
+  };
+
   return (
     <Stage
       width={window.innerWidth}
@@ -244,9 +284,7 @@ const KonvaRenderer: React.FC = () => {
       className="bg-[#0A0A0A]"
     >
       <Layer>
-        {assets.map((asset) => (
-          <AssetComponent key={asset.id} asset={asset} />
-        ))}
+        {renderAssets(null)}
         {selectedIds.length > 0 && activeTool === 'cursor' && (
           <Transformer
             ref={transformerRef}

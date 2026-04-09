@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSceneStore } from '../../store/useSceneStore';
+import { useEditorStore } from '../../store/useEditorStore';
 import { 
   Square, 
   Circle, 
@@ -15,9 +16,12 @@ import {
   AlignCenter,
   AlignRight,
   Bold,
-  Italic
+  Italic,
+  Frame,
+  Scissors
 } from 'lucide-react';
 import ColorPicker from '../shared/ColorPicker';
+import FrameLibrary from '../sidebar/FrameLibrary';
 
 const PropertyGroup: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div className="py-4 border-b border-white/5 space-y-3">
@@ -29,7 +33,15 @@ const PropertyGroup: React.FC<{ label: string; children: React.ReactNode }> = ({
   </div>
 );
 
-const Input = ({ label, value, onChange, type = "text", icon: Icon }: any) => (
+interface InputProps {
+  label?: string;
+  value: string | number;
+  onChange: (val: string) => void;
+  type?: string;
+  icon?: React.ElementType;
+}
+
+const Input: React.FC<InputProps> = ({ label, value, onChange, type = "text", icon: Icon }) => (
   <div className="flex items-center gap-2 bg-white/5 border border-white/5 rounded-lg px-2 py-1.5 focus-within:border-flippy-blue/50 transition-all">
     {Icon && <Icon size={14} className="text-white/20" />}
     <div className="flex flex-col flex-1">
@@ -46,10 +58,15 @@ const Input = ({ label, value, onChange, type = "text", icon: Icon }: any) => (
 
 const RightSidebar: React.FC = () => {
   const { assets, selectedIds, updateAsset } = useSceneStore();
+  const { activeTool } = useEditorStore();
   const selectedAsset = assets.find(a => selectedIds.includes(a.id));
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   if (!selectedAsset) {
+    if (activeTool === 'frame') {
+       return <aside className="w-80 border-l border-white/5 bg-[#0D0D0D] flex flex-col"><FrameLibrary /></aside>;
+    }
+
     return (
       <aside className="w-64 border-l border-white/5 bg-[#0D0D0D] flex flex-col p-4">
         <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center opacity-20">
@@ -61,9 +78,9 @@ const RightSidebar: React.FC = () => {
   }
 
 
-  const handlePropChange = (key: string, value: string | number) => {
-    updateAsset(selectedAsset.id, {
-      properties: { ...selectedAsset.properties, [key]: value }
+  const handlePropChange = (key: string, value: string | number | boolean) => {
+    updateAsset(selectedAsset!.id, {
+      properties: { ...selectedAsset!.properties, [key]: value }
     });
   };
 
@@ -76,6 +93,7 @@ const RightSidebar: React.FC = () => {
           {selectedAsset.type === 'circle' && <Circle size={14} className="text-flippy-blue" />}
           {selectedAsset.type === 'text' && <Type size={14} className="text-flippy-blue" />}
           {selectedAsset.type === 'image' && <ImageIcon size={14} className="text-flippy-blue" />}
+          {selectedAsset.type === 'frame' && <Frame size={14} className="text-flippy-blue" />}
           <span className="text-[11px] font-bold text-white truncate max-w-[100px]">{selectedAsset.name}</span>
         </div>
         <div className="flex items-center gap-1">
@@ -98,12 +116,12 @@ const RightSidebar: React.FC = () => {
         {/* Transform Group */}
         <PropertyGroup label="Transform">
           <div className="grid grid-cols-2 gap-2">
-            <Input label="X" value={Math.round(selectedAsset.x)} onChange={(v: any) => updateAsset(selectedAsset.id, { x: parseInt(v) || 0 })} />
-            <Input label="Y" value={Math.round(selectedAsset.y)} onChange={(v: any) => updateAsset(selectedAsset.id, { y: parseInt(v) || 0 })} />
-            <Input label="W" value={Math.round(selectedAsset.width)} onChange={(v: any) => updateAsset(selectedAsset.id, { width: parseInt(v) || 5 })} />
-            <Input label="H" value={Math.round(selectedAsset.height)} onChange={(v: any) => updateAsset(selectedAsset.id, { height: parseInt(v) || 5 })} />
+            <Input label="X" value={Math.round(selectedAsset.x)} onChange={(v: string) => updateAsset(selectedAsset.id, { x: parseInt(v) || 0 })} />
+            <Input label="Y" value={Math.round(selectedAsset.y)} onChange={(v: string) => updateAsset(selectedAsset.id, { y: parseInt(v) || 0 })} />
+            <Input label="W" value={Math.round(selectedAsset.width)} onChange={(v: string) => updateAsset(selectedAsset.id, { width: parseInt(v) || 5 })} />
+            <Input label="H" value={Math.round(selectedAsset.height)} onChange={(v: string) => updateAsset(selectedAsset.id, { height: parseInt(v) || 5 })} />
           </div>
-          <Input label="Rotation" value={Math.round(selectedAsset.rotation)} onChange={(v: any) => updateAsset(selectedAsset.id, { rotation: parseInt(v) || 0 })} />
+          <Input label="Rotation" value={Math.round(selectedAsset.rotation)} onChange={(v: string) => updateAsset(selectedAsset.id, { rotation: parseInt(v) || 0 })} />
         </PropertyGroup>
 
         {/* Text Properties - Conditional */}
@@ -122,8 +140,8 @@ const RightSidebar: React.FC = () => {
               </select>
               
               <div className="grid grid-cols-2 gap-2">
-                <Input label="Size" type="number" value={selectedAsset.properties.fontSize || 16} onChange={(v: any) => handlePropChange('fontSize', parseInt(v) || 1)} />
-                <Input label="Line H" type="number" value={selectedAsset.properties.lineHeight || 1.2} onChange={(v: any) => handlePropChange('lineHeight', parseFloat(v) || 1)} />
+                <Input label="Size" type="number" value={selectedAsset.properties.fontSize || 16} onChange={(v: string) => handlePropChange('fontSize', parseInt(v) || 1)} />
+                <Input label="Line H" type="number" value={selectedAsset.properties.lineHeight || 1.2} onChange={(v: string) => handlePropChange('lineHeight', parseFloat(v) || 1)} />
               </div>
 
               <div className="flex items-center gap-1 bg-white/5 p-1 rounded-lg border border-white/5">
@@ -168,7 +186,21 @@ const RightSidebar: React.FC = () => {
 
         {/* Appearance Group */}
         <PropertyGroup label="Appearance">
-          <div className="space-y-2">
+          <div className="space-y-3">
+            {selectedAsset.type === 'frame' && (
+              <div className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+                 <div className="flex items-center gap-2">
+                   <Scissors size={14} className="text-white/40" />
+                   <span className="text-[10px] font-bold text-white/60">Clip Content</span>
+                 </div>
+                 <button
+                    onClick={() => handlePropChange('clipContent', !selectedAsset.properties.clipContent)}
+                    className={`w-8 h-4 rounded-full transition-all relative ${selectedAsset.properties.clipContent ? 'bg-flippy-blue' : 'bg-white/10'}`}
+                 >
+                   <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${selectedAsset.properties.clipContent ? 'right-0.5' : 'left-0.5'}`} />
+                 </button>
+              </div>
+            )}
             <div className="relative">
               <div 
                 onClick={() => setShowColorPicker(!showColorPicker)}

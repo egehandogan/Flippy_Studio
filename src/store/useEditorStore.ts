@@ -10,6 +10,7 @@ export type ToolType =
   | 'comment'   // C: Comment Pins
   | 'component' // Alt+C: 3D/Reusable assets
   | 'prototype' // P: Interaction linking
+  | 'frame'     // F: Artboards/Layout containers
   | 'add';      // Importer
 
 interface EditorState {
