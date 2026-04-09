@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSceneGraph } from '../../hooks/useSceneGraph';
+import { useSceneStore } from '../../store/useSceneStore';
 import { bridgeService } from '../../services/BridgeService';
 import { 
   Search, 
@@ -14,7 +14,11 @@ import {
 } from 'lucide-react';
 
 const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
-  const sceneGraph = useSceneGraph();
+  const assets = useSceneStore((state) => state.assets);
+  const selectedIds = useSceneStore((state) => state.selectedIds);
+  const updateAsset = useSceneStore((state) => state.updateAsset);
+  const selectAssets = useSceneStore((state) => state.selectAssets);
+  
   const bridge = bridgeService.state;
 
   const engines = [
@@ -58,7 +62,6 @@ const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
                 </div>
                 <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{engine.name}</span>
                 
-                {/* Live Sync Pill */}
                 <div className="absolute top-2 right-2 flex items-center gap-1">
                   <div className={`w-1 h-1 rounded-full ${isConnected ? 'bg-green-500 shadow-[0_0_5px_#22c55e]' : 'bg-white/10'}`}></div>
                   {isConnected && <span className="text-[7px] text-green-500/80 font-bold">LIVE</span>}
@@ -81,7 +84,6 @@ const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
           </div>
         </div>
 
-        {/* Layer Search Area from Image 1 */}
         <div className="px-4 mb-3">
           <div className="relative group">
             <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white/40" />
@@ -94,12 +96,12 @@ const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar px-2 pb-4">
-          {sceneGraph.assets.slice().reverse().map((asset) => (
+          {assets.slice().reverse().map((asset) => (
             <div 
               key={asset.id}
-              onClick={() => sceneGraph.selectAsset(asset.id)}
+              onClick={() => selectAssets([asset.id])}
               className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all mb-0.5 ${
-                sceneGraph.selectedAssetIds.has(asset.id) 
+                selectedIds.includes(asset.id) 
                   ? 'bg-flippy-blue/[0.12] text-flippy-blue' 
                   : 'text-white/40 hover:bg-white/[0.04] hover:text-white/80'
               }`}
@@ -112,7 +114,7 @@ const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
-                    sceneGraph.updateAsset(asset.id, { visible: !asset.visible });
+                    updateAsset(asset.id, { visible: !asset.visible });
                   }}
                   className="p-1 hover:bg-white/5 rounded-lg transition-colors"
                 >
@@ -121,7 +123,7 @@ const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
-                    sceneGraph.updateAsset(asset.id, { locked: !asset.locked });
+                    updateAsset(asset.id, { locked: !asset.locked });
                   }}
                   className="p-1 hover:bg-white/5 rounded-lg transition-colors"
                 >
@@ -131,7 +133,7 @@ const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
             </div>
           ))}
 
-          {sceneGraph.assets.length === 0 && (
+          {assets.length === 0 && (
             <div className="h-40 flex flex-col items-center justify-center text-white/[0.03] space-y-3">
               <LayersIcon size={32} />
               <span className="text-[10px] font-bold uppercase tracking-[0.2em]">No Layers</span>

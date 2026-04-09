@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSceneGraph } from '../../hooks/useSceneGraph';
+import { useSceneStore } from '../../store/useSceneStore';
 import TopBar from './TopBar';
 import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
@@ -13,7 +13,6 @@ import PushModal from '../modals/PushModal';
 import AIStudioModal from '../modals/AIStudioModal';
 
 const MainLayout: React.FC = () => {
-  useSceneGraph();
   const [isPushModalOpen, setIsPushModalOpen] = useState(false);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
 

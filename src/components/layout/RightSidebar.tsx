@@ -1,15 +1,26 @@
 import React from 'react';
-import { useSceneGraph } from '../../hooks/useSceneGraph';
+import { useSceneStore } from '../../store/useSceneStore';
 import { 
   AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   Eye, EyeOff, Lock, Unlock, ChevronDown, Plus, MoreHorizontal, Target
 } from 'lucide-react';
 
 const RightSidebar: React.FC = () => {
-  const scene = useSceneGraph();
-  const selectedIds = Array.from(scene.selectedAssetIds);
-  const selectedAssets = selectedIds.map(id => scene.assets.find(a => a.id === id)).filter(Boolean);
+  const assets = useSceneStore((state) => state.assets);
+  const selectedIds = useSceneStore((state) => state.selectedIds);
+  const updateAsset = useSceneStore((state) => state.updateAsset);
+  
+  const selectedAssets = assets.filter(a => selectedIds.includes(a.id));
   const firstAsset = selectedAssets[0];
+
+  const updateSelectedProperties = (updates: any) => {
+    selectedIds.forEach(id => {
+      const asset = assets.find(a => a.id === id);
+      if (asset) {
+        updateAsset(id, { properties: { ...asset.properties, ...updates } });
+      }
+    });
+  };
 
   if (!firstAsset) {
     return (
@@ -36,29 +47,29 @@ const RightSidebar: React.FC = () => {
       <div className="flex-1">
         {/* Alignment */}
         <div className="p-2 border-b border-white/5 flex items-center justify-around">
-          <AlignButton icon={<AlignLeft size={16} />} onClick={() => scene.alignAssets('align-left')} />
-          <AlignButton icon={<AlignCenter size={16} />} onClick={() => scene.alignAssets('align-h-center')} />
-          <AlignButton icon={<AlignRight size={16} />} onClick={() => scene.alignAssets('align-right')} />
+          <AlignButton icon={<AlignLeft size={16} />} onClick={() => {}} />
+          <AlignButton icon={<AlignCenter size={16} />} onClick={() => {}} />
+          <AlignButton icon={<AlignRight size={16} />} onClick={() => {}} />
           <div className="w-[1px] h-4 bg-white/10 mx-1"></div>
-          <AlignButton icon={<AlignStartVertical size={16} />} onClick={() => scene.alignAssets('align-top')} />
-          <AlignButton icon={<AlignCenterVertical size={16} />} onClick={() => scene.alignAssets('align-v-center')} />
-          <AlignButton icon={<AlignEndVertical size={16} />} onClick={() => scene.alignAssets('align-bottom')} />
+          <AlignButton icon={<AlignStartVertical size={16} />} onClick={() => {}} />
+          <AlignButton icon={<AlignCenterVertical size={16} />} onClick={() => {}} />
+          <AlignButton icon={<AlignEndVertical size={16} />} onClick={() => {}} />
         </div>
 
         {/* Position & Layout */}
         <div className="p-3 border-b border-white/5 grid grid-cols-2 gap-x-4 gap-y-3">
-          <PropertyInput label="X" value={Math.round(firstAsset.x)} onChange={(v) => scene.updateAsset(firstAsset.id, { x: Number(v) })} />
-          <PropertyInput label="Y" value={Math.round(firstAsset.y)} onChange={(v) => scene.updateAsset(firstAsset.id, { y: Number(v) })} />
-          <PropertyInput label="W" value={Math.round(firstAsset.width)} onChange={(v) => scene.updateAsset(firstAsset.id, { width: Math.max(1, Number(v)) })} />
-          <PropertyInput label="H" value={Math.round(firstAsset.height)} onChange={(v) => scene.updateAsset(firstAsset.id, { height: Math.max(1, Number(v)) })} />
-          <PropertyInput label="R" value={Math.round(firstAsset.rotation * (180/Math.PI))} unit="°" onChange={(v) => scene.updateAsset(firstAsset.id, { rotation: Number(v) * (Math.PI/180) })} />
-          <PropertyInput label="O" value={Math.round(firstAsset.properties.fillOpacity || 100)} unit="%" onChange={(v) => scene.updateAssetProperties(firstAsset.id, { fillOpacity: Number(v) })} />
+          <PropertyInput label="X" value={Math.round(firstAsset.x)} onChange={(v) => updateAsset(firstAsset.id, { x: Number(v) })} />
+          <PropertyInput label="Y" value={Math.round(firstAsset.y)} onChange={(v) => updateAsset(firstAsset.id, { y: Number(v) })} />
+          <PropertyInput label="W" value={Math.round(firstAsset.width)} onChange={(v) => updateAsset(firstAsset.id, { width: Math.max(1, Number(v)) })} />
+          <PropertyInput label="H" value={Math.round(firstAsset.height)} onChange={(v) => updateAsset(firstAsset.id, { height: Math.max(1, Number(v)) })} />
+          <PropertyInput label="R" value={Math.round(firstAsset.rotation)} unit="°" onChange={(v) => updateAsset(firstAsset.id, { rotation: Number(v) })} />
+          <PropertyInput label="O" value={Math.round(firstAsset.properties.opacity || 100)} unit="%" onChange={(v) => updateSelectedProperties({ opacity: Number(v) })} />
         </div>
 
         {/* Appearance */}
         <Section title="Appearance">
           <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <PropertyInput label="Radius" value={firstAsset.properties.cornerRadius || 0} onChange={(v) => scene.updateAssetProperties(firstAsset.id, { cornerRadius: Number(v) })} />
+            <PropertyInput label="Corner" value={firstAsset.properties.cornerRadius || 0} onChange={(v) => updateSelectedProperties({ cornerRadius: Number(v) })} />
           </div>
         </Section>
 
@@ -67,24 +78,14 @@ const RightSidebar: React.FC = () => {
           <div className="flex items-center gap-2">
             <div 
               className="w-6 h-6 rounded-md border border-white/10 shrink-0 cursor-pointer shadow-inner" 
-              style={{ backgroundColor: firstAsset.properties.fill }}
-              onClick={() => {
-                // Future: Open real color picker
-              }}
+              style={{ backgroundColor: firstAsset.properties.fill || '#FFFFFF' }}
             />
             <input 
               type="text" 
               className="flex-1 bg-transparent text-[11px] font-mono text-white/80 focus:outline-none uppercase" 
-              value={firstAsset.properties.fill?.replace('#', '')}
-              onChange={(e) => scene.updateAssetProperties(firstAsset.id, { fill: `#${e.target.value}` })}
+              value={(firstAsset.properties.fill || '#FFFFFF').replace('#', '')}
+              onChange={(e) => updateSelectedProperties({ fill: `#${e.target.value}` })}
             />
-            <span className="text-[10px] text-white/40 font-mono">{Math.round(firstAsset.properties.fillOpacity || 100)}%</span>
-            <button 
-              className="p-1 hover:bg-white/5 rounded text-white/40 transition-all"
-              onClick={() => scene.updateAssetProperties(firstAsset.id, { fillHidden: !firstAsset.properties.fillHidden })}
-            >
-              {firstAsset.properties.fillHidden ? <EyeOff size={14} /> : <Eye size={14} />}
-            </button>
           </div>
         </Section>
 
@@ -94,35 +95,22 @@ const RightSidebar: React.FC = () => {
               <div className="flex items-center gap-2">
                 <div 
                   className="w-6 h-6 rounded-md border border-white/10 shrink-0 cursor-pointer" 
-                  style={{ backgroundColor: firstAsset.properties.stroke || '#0094FF' }}
+                  style={{ backgroundColor: firstAsset.properties.stroke || '#0095FF' }}
                 />
                 <input 
                   type="text" 
                   className="flex-1 bg-transparent text-[11px] font-mono text-white/80 focus:outline-none uppercase" 
-                  value={firstAsset.properties.stroke?.replace('#', '') || '0094FF'}
-                  onChange={(e) => scene.updateAssetProperties(firstAsset.id, { stroke: `#${e.target.value}` })}
+                  value={(firstAsset.properties.stroke || '#0095FF').replace('#', '')}
+                  onChange={(e) => updateSelectedProperties({ stroke: `#${e.target.value}` })}
                 />
-                <button 
-                  className="p-1 hover:bg-white/5 rounded text-white/40 transition-all"
-                  onClick={() => scene.updateAssetProperties(firstAsset.id, { strokeHidden: !firstAsset.properties.strokeHidden })}
-                >
-                  {firstAsset.properties.strokeHidden ? <EyeOff size={14} /> : <Eye size={14} />}
-                </button>
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex-1">
-                   <PropertyInput label="Width" value={firstAsset.properties.strokeWidth || 1} onChange={(v) => scene.updateAssetProperties(firstAsset.id, { strokeWidth: Number(v) })} />
+                   <PropertyInput label="W" value={firstAsset.properties.strokeWidth || 1} onChange={(v) => updateSelectedProperties({ strokeWidth: Number(v) })} />
                 </div>
-                <div className="bg-white/5 rounded px-2 h-7 flex items-center text-[10px] text-white/60 font-medium">Inside</div>
               </div>
            </div>
         </Section>
-        
-        {/* Effects */}
-        <Section title="Effects" action={<Plus size={14} className="text-white/40" />} />
-
-        {/* Export */}
-        <Section title="Export" action={<Plus size={14} className="text-white/40" />} />
       </div>
 
       {/* Footer Info */}
@@ -130,8 +118,8 @@ const RightSidebar: React.FC = () => {
         <div className="flex items-center justify-between text-[10px] text-white/20 uppercase font-bold tracking-widest">
           <span>Asset Status</span>
           <div className="flex gap-2">
-            <IconButton icon={firstAsset.locked ? <Lock size={12} /> : <Unlock size={12} />} onClick={() => scene.updateAsset(firstAsset.id, { locked: !firstAsset.locked })} />
-            <IconButton icon={firstAsset.visible ? <Eye size={12} /> : <EyeOff size={12} />} onClick={() => scene.updateAsset(firstAsset.id, { visible: !firstAsset.visible })} />
+            <IconButton icon={firstAsset.locked ? <Lock size={12} /> : <Unlock size={12} />} onClick={() => updateAsset(firstAsset.id, { locked: !firstAsset.locked })} />
+            <IconButton icon={firstAsset.visible ? <Eye size={12} /> : <EyeOff size={12} />} onClick={() => updateAsset(firstAsset.id, { visible: !firstAsset.visible })} />
           </div>
         </div>
       </div>

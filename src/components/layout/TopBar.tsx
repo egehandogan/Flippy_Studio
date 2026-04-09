@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Search, Sparkles, Menu, Bell, Loader2, Send } from 'lucide-react';
 import { UserButton } from '@clerk/clerk-react';
 import { generateImage } from '../../services/AIService';
-import { FlippyAsset, sceneGraph } from '../../core/SceneGraph';
+import { useSceneStore, type Asset } from '../../store/useSceneStore';
 
 interface TopBarProps {
   onOpenAI?: () => void; 
@@ -12,27 +12,39 @@ const TopBar: React.FC<TopBarProps> = () => {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  const addAsset = useSceneStore((state) => state.addAsset);
+  const selectAssets = useSceneStore((state) => state.selectAssets);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
     setIsGenerating(true);
     try {
       const imageUrl = await generateImage(prompt);
-      const img = new Image();
-      img.src = imageUrl;
-      img.onload = () => {
-        const asset = new FlippyAsset('image', 100, 100, {
-          width: 512,
-          height: 512,
-          imageElement: img,
+      const id = crypto.randomUUID();
+      
+      const newAsset: Asset = {
+        id,
+        type: 'image',
+        x: 100,
+        y: 100,
+        width: 512,
+        height: 512,
+        rotation: 0,
+        name: `AI: ${prompt.slice(0, 20)}...`,
+        visible: true,
+        locked: false,
+        parentId: null,
+        properties: {
           src: imageUrl,
-          name: `AI: ${prompt.slice(0, 20)}...`
-        });
-        sceneGraph.addAsset(asset);
-        sceneGraph.selectAsset(asset.id);
-        setIsAIModalOpen(false);
-        setPrompt('');
+          opacity: 100,
+        }
       };
+      
+      addAsset(newAsset);
+      selectAssets([id]);
+      setIsAIModalOpen(false);
+      setPrompt('');
     } catch (error) {
       console.error("AI Generation failed:", error);
       alert("AI Generation failed. Please try again.");
@@ -43,7 +55,6 @@ const TopBar: React.FC<TopBarProps> = () => {
 
   return (
     <header className="h-14 border-b border-white/[0.08] bg-black flex items-center justify-between px-4 z-50 select-none">
-      {/* Left Section: Logo */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 px-1">
           <div className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-xl border border-white/10 shadow-xl overflow-hidden">
@@ -56,7 +67,6 @@ const TopBar: React.FC<TopBarProps> = () => {
         </button>
       </div>
 
-      {/* Center Section: Global Search */}
       <div className="flex-1 max-w-xl mx-8">
         <div className="relative group">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-flippy-blue transition-all" />
@@ -68,7 +78,6 @@ const TopBar: React.FC<TopBarProps> = () => {
         </div>
       </div>
 
-      {/* Right Section */}
       <div className="flex items-center gap-4">
         <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-white/[0.02] border border-white/5 rounded-full">
           <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
