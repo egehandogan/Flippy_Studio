@@ -70,46 +70,46 @@ export class FlippyAsset {
                      path.rect(rx, ry, tw, th);
                 }
                 
-                ctx.fillStyle = this.properties.fill;
-                ctx.globalAlpha = (this.properties.fillOpacity !== undefined ? this.properties.fillOpacity : 100) / 100;
-                ctx.fill(path);
-                ctx.globalAlpha = 1.0;
-                
-                if (this.properties.strokeWidth && this.properties.stroke !== 'transparent') {
+                // Fill
+                if (!this.properties.fillHidden && this.properties.fill !== 'transparent') {
+                    ctx.fillStyle = this.properties.fill;
+                    ctx.globalAlpha = (this.properties.fillOpacity ?? 100) / 100;
+                    ctx.fill(path);
+                    ctx.globalAlpha = 1.0;
+                }
+
+                if (!this.properties.strokeHidden &&
+                    this.properties.strokeWidth && this.properties.stroke !== 'transparent') {
                     ctx.strokeStyle = this.properties.stroke;
                     ctx.lineWidth = this.properties.strokeWidth;
-                    ctx.globalAlpha = (this.properties.strokeOpacity !== undefined ? this.properties.strokeOpacity : 100) / 100;
-                    
+                    ctx.globalAlpha = (this.properties.strokeOpacity ?? 100) / 100;
+
                     const pos = this.properties.strokePosition || 'inside';
                     const oPath = new Path2D();
                     if (pos === 'inside') {
                          const i = this.properties.strokeWidth / 2;
                          if (radius > 0) {
-                             oPath.roundRect(rx + i, ry + i, tw - i * 2, th - i * 2, Math.max(0, radius - i));
+                             oPath.roundRect(rx + i, ry + i, tw - i*2, th - i*2, Math.max(0, radius - i));
                          } else {
-                             oPath.rect(rx + i, ry + i, tw - i * 2, th - i * 2);
+                             oPath.rect(rx + i, ry + i, tw - i*2, th - i*2);
                          }
                     } else if (pos === 'outside') {
                          const o = this.properties.strokeWidth / 2;
                          if (radius > 0) {
-                             oPath.roundRect(rx - o, ry - o, tw + o * 2, th + o * 2, radius + o);
+                             oPath.roundRect(rx - o, ry - o, tw + o*2, th + o*2, radius + o);
                          } else {
-                             oPath.rect(rx - o, ry - o, tw + o * 2, th + o * 2);
+                             oPath.rect(rx - o, ry - o, tw + o*2, th + o*2);
                          }
-                    } else { // center
-                         if (radius > 0) {
-                             oPath.roundRect(rx, ry, tw, th, radius);
-                         } else {
-                             oPath.rect(rx, ry, tw, th);
-                         }
+                    } else {
+                         if (radius > 0) oPath.roundRect(rx, ry, tw, th, radius);
+                         else oPath.rect(rx, ry, tw, th);
                     }
                     ctx.stroke(oPath);
                 }
                 ctx.globalAlpha = 1.0;
-                
+
                 if (this.type === 'frame') {
-                    // Draw Frame Name
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
                     ctx.font = `${12 * scale}px Inter`;
                     ctx.textAlign = 'left';
                     ctx.fillText(this.name, rx, ry - (6 * scale));
@@ -117,13 +117,22 @@ export class FlippyAsset {
                 break;
             }
             case 'circle':
-                ctx.fillStyle = this.properties.fill;
-                ctx.strokeStyle = this.properties.stroke;
-                ctx.lineWidth = this.properties.strokeWidth;
                 ctx.beginPath();
                 ctx.arc(0, 0, Math.min(tw, th)/2, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
+                if (!this.properties.fillHidden && this.properties.fill !== 'transparent') {
+                    ctx.fillStyle = this.properties.fill;
+                    ctx.globalAlpha = (this.properties.fillOpacity ?? 100) / 100;
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0;
+                }
+                if (!this.properties.strokeHidden && this.properties.strokeWidth
+                    && this.properties.stroke !== 'transparent') {
+                    ctx.strokeStyle = this.properties.stroke;
+                    ctx.lineWidth = this.properties.strokeWidth;
+                    ctx.globalAlpha = (this.properties.strokeOpacity ?? 100) / 100;
+                    ctx.stroke();
+                    ctx.globalAlpha = 1.0;
+                }
                 break;
             case 'image':
                 if (this.properties.imageElement) {

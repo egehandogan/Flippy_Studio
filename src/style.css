@@ -689,9 +689,8 @@ kbd {
 .icon-btn:hover { color: white; background: var(--bg-hover); }
 .icon-btn.text-like { font-size: 16px; font-weight: 300; width: 20px; height: 20px; }
 
-/* Fill/Stroke */
+/* ── Fill/Stroke legacy ── */
 .fill-row { display: flex; align-items: center; gap: 6px; }
-
 .compound-input-container {
   display: flex; align-items: center;
   background: rgba(255,255,255,0.04);
@@ -701,18 +700,146 @@ kbd {
   flex-grow: 1;
 }
 .compound-input-container:focus-within { border-color: var(--accent-blue); }
-
 .color-swatch-label {
   position: relative; width: 14px; height: 14px;
   cursor: pointer; margin-right: 4px; flex-shrink: 0;
+  pointer-events: auto;
 }
 .color-swatch { width: 100%; height: 100%; border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
 .hidden-color-picker { position: absolute; width: 1px; height: 1px; clip: rect(0,0,0,0); opacity: 0; }
-
 .vertical-divider { width: 1px; height: 12px; background: rgba(255,255,255,0.08); margin: 0 4px; }
 .pct-symbol { font-size: 10px; color: var(--text-muted); margin-right: 2px; }
 .pct-input { width: 24px; padding: 2px; text-align: right; color: rgba(255,255,255,0.7); }
 .hex-input { text-transform: uppercase; }
+
+/* ── New Properties Panel ── */
+.properties-panel { pointer-events: auto !important; }
+
+.props-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  padding: 0;
+}
+
+.prop-section {
+  padding: 10px 14px;
+}
+
+.spatial-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 8px;
+}
+
+/* Color row: swatch thumb + hex input + % + eye + minus */
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  pointer-events: auto;
+}
+.color-row.opacity-dim { opacity: 0.5; }
+
+.color-thumb-btn {
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.2), 0 1px 4px rgba(0,0,0,0.5);
+  transition: transform 0.12s, box-shadow 0.12s;
+  pointer-events: auto;
+}
+.color-thumb-btn:hover {
+  transform: scale(1.12);
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.4), 0 2px 8px rgba(0,0,0,0.6);
+}
+
+.hex-text-input {
+  flex: 1; min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 11.5px;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  cursor: text;
+  padding: 2px 0;
+  pointer-events: auto;
+}
+.hex-text-input::selection { background: rgba(0,148,255,0.35); }
+.hex-text-input:focus { color: white; }
+
+.hex-pct-sep {
+  width: 1px; height: 10px; flex-shrink: 0;
+  background: rgba(255,255,255,0.1);
+  margin: 0 2px;
+}
+
+.pct-num-input {
+  width: 28px;
+  background: transparent; border: none; outline: none;
+  color: var(--text-muted);
+  font-size: 11px; font-family: var(--font-main);
+  text-align: right;
+  -moz-appearance: textfield; appearance: textfield;
+  pointer-events: auto;
+}
+.pct-num-input::-webkit-inner-spin-button,
+.pct-num-input::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; }
+.pct-num-input:focus { color: white; }
+
+.row-eye-btn {
+  width: 20px; height: 20px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: none;
+  color: rgba(255,255,255,0.25);
+  cursor: pointer; border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  pointer-events: auto;
+}
+.row-eye-btn.active { color: rgba(255,255,255,0.7); }
+.row-eye-btn:hover { color: white; background: rgba(255,255,255,0.06); }
+
+.row-minus-btn {
+  width: 18px; height: 18px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: none;
+  color: rgba(255,255,255,0.25);
+  font-size: 16px; font-weight: 300; line-height: 1;
+  cursor: pointer; border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  pointer-events: auto;
+}
+.row-minus-btn:hover { color: #ff5f57; background: rgba(255,95,87,0.1); }
+
+.color-row-empty {
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.2);
+  padding: 4px 0;
+  font-style: italic;
+}
+
+.stroke-extras-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.small-num {
+  width: 40px ;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
+  padding: 4px 5px;
+  color: white;
+  font-size: 11px;
+  text-align: center;
+}
+
 
 /* Align Bar */
 .align-bar {
