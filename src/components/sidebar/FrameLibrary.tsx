@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useSceneStore, type Asset } from '../../store/useSceneStore';
 import { useEditorStore } from '../../store/useEditorStore';
+import { generateWireframeLayout } from '../../utils/wireframeGen';
 
 interface FrameTemplate {
   name: string;
@@ -156,30 +157,24 @@ const FrameLibrary: React.FC = () => {
   const selectAssets = useSceneStore(s => s.selectAssets);
   const { zoom, panning } = useEditorStore();
 
-  const handleAddFrame = (name: string, width: number, height: number, wireframeType?: string) => {
+  const handleAddFrame = (name: string, width: number, height: number, wireframeType?: string, genre?: string) => {
     const frameId = crypto.randomUUID();
     const assets = useSceneStore.getState().assets;
     
-    // Calculate smart position to avoid overlap (Grid layout)
-    // Find all top-level frames to calculate the next position
     const topLevelFrames = assets.filter(a => a.type === 'frame' && a.parentId === null);
     
     let cx, cy;
     
     if (topLevelFrames.length === 0) {
-      // First frame goes to center of viewport
       cx = (window.innerWidth / 2 - panning.x) / zoom - width / 2;
       cy = (window.innerHeight / 2 - panning.y) / zoom - height / 2;
     } else {
-      // Find the rightmost frame
       const rightmost = topLevelFrames.reduce((max, f) => {
         const right = f.x + f.width;
         return right > max ? right : max;
       }, -Infinity);
       
-      // Place it to the right with a 100px gap
       cx = rightmost + 100;
-      // Keep the same Y as the first frame for horizontal alignment
       cy = topLevelFrames[0].y;
     }
 
@@ -206,64 +201,12 @@ const FrameLibrary: React.FC = () => {
 
     addAsset(frame);
 
-    // If it's a wireframe, add children
-    if (wireframeType) {
-      addWireframeElements(frameId, wireframeType, width, height);
+    if (wireframeType && genre) {
+      const children = generateWireframeLayout(genre, wireframeType, frameId, width, height);
+      children.forEach(child => addAsset(child as Asset));
     }
 
     selectAssets([frameId]);
-  };
-
-  const addWireframeElements = (frameId: string, type: string, w: number, h: number) => {
-    const createChild = (name: string, tx: number, ty: number, tw: number, th: number, assetType: 'rect' | 'text' | 'circle' = 'rect', props: Record<string, unknown> = {}) => {
-      addAsset({
-        id: crypto.randomUUID(),
-        type: assetType,
-        x: tx,
-        y: ty,
-        width: tw,
-        height: th,
-        rotation: 0,
-        name,
-        visible: true,
-        locked: false,
-        parentId: frameId,
-        properties: {
-           fill: '#FFFFFF10',
-           stroke: '#FFFFFF20',
-           strokeWidth: 1,
-           cornerRadius: 2,
-           ...props
-        }
-      });
-    };
-
-    // basic common elements
-    if (type === 'main-menu') {
-       createChild('Title', w * 0.1, h * 0.2, w * 0.4, 60, 'text', { text: 'GAME TITLE', fontSize: 48, fontWeight: 'bold' });
-       createChild('Btn Play', w * 0.1, h * 0.5, 200, 40);
-       createChild('Btn Options', w * 0.1, h * 0.58, 200, 40);
-       createChild('Btn Quit', w * 0.1, h * 0.66, 200, 40);
-    } else if (type === 'hud') {
-       createChild('Health Bar', 40, h - 80, 250, 20, 'rect', { fill: '#FF000040' });
-       createChild('Mana Bar', 40, h - 50, 200, 15, 'rect', { fill: '#0000FF40' });
-       createChild('Minimap', w - 240, 40, 200, 200, 'circle');
-       createChild('Skill 1', w / 2 - 100, h - 70, 40, 40);
-       createChild('Skill 2', w / 2 - 50, h - 70, 40, 40);
-       createChild('Skill 3', w / 2, h - 70, 40, 40);
-    } else if (type === 'inventory') {
-       createChild('Header', 0, 0, w, 60);
-       createChild('Grid Container', 40, 100, w - 300, h - 200);
-       for (let i = 0; i < 12; i++) {
-         const row = Math.floor(i / 4);
-         const col = i % 4;
-         createChild(`Slot ${i}`, 60 + col * 100, 120 + row * 100, 80, 80);
-       }
-       createChild('Char Preview', w - 240, 100, 200, h - 200);
-    } else {
-       // Default placeholder for other wireframes
-       createChild(`${type.toUpperCase()} Label`, w/2 - 100, h/2 - 20, 200, 40, 'text', { text: type.replace('-', ' ').toUpperCase(), textAlign: 'center' });
-    }
   };
 
   const selectedCat = CATEGORIES.find(c => c.id === selectedCatId);
@@ -281,7 +224,6 @@ const FrameLibrary: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
         {!selectedCatId ? (
           <div className="space-y-4">
-             {/* Quick Tip */}
              <div className="p-3 rounded-xl bg-flippy-blue/5 border border-flippy-blue/10 flex gap-3">
                 <div className="w-8 h-8 rounded-lg bg-flippy-blue/10 flex items-center justify-center shrink-0">
                   <Monitor size={14} className="text-flippy-blue" />
@@ -372,7 +314,7 @@ const FrameLibrary: React.FC = () => {
                     {GAME_WIREFRAMES.map((wf, i) => (
                       <button
                         key={i}
-                        onClick={() => handleAddFrame(`${selectedSubCatId} - ${wf.name}`, 1920, 1080, wf.id)}
+                        onClick={() => handleAddFrame(`${selectedSubCatId} - ${wf.name}`, 1920, 1080, wf.id, selectedSubCatId || undefined)}
                         className="flex items-center justify-between p-3 rounded-lg bg-[#111] border border-white/5 hover:bg-white/10 group transition-all"
                       >
                          <div className="flex items-center gap-2">
