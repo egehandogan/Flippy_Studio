@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAIStore } from '../../store/useAIStore';
 import { useSceneStore, type Asset } from '../../store/useSceneStore';
+import { useEditorStore } from '../../store/useEditorStore';
 import { generateImageFromHF } from '../../services/HFService';
 import {
   Sparkles,
@@ -15,10 +16,10 @@ import {
 } from 'lucide-react';
 
 const PRESET_MODELS = [
-  { id: 'stable-diffusion', name: 'Stable Diffusion XL', icon: '🎨' },
-  { id: 'midjourney', name: 'OpenJourney v4', icon: '🌌' },
-  { id: 'imagine', name: 'RealVis XL', icon: '📸' },
-  { id: 'playground', name: 'Playground v2.5', icon: '🎮' },
+  { id: 'stable-diffusion', name: 'Stable Diffusion XL' },
+  { id: 'midjourney', name: 'OpenJourney v4' },
+  { id: 'imagine', name: 'RealVis XL' },
+  { id: 'playground', name: 'Playground v2.5' },
 ];
 
 const GenerationPanel: React.FC = () => {
@@ -66,11 +67,15 @@ const GenerationPanel: React.FC = () => {
 
   const handleImportToCanvas = (imgUrl: string, imgPrompt: string) => {
     const id = crypto.randomUUID();
+    // Place at viewport center so it's always visible
+    const { zoom, panning } = useEditorStore.getState();
+    const cx = (window.innerWidth / 2 - panning.x) / zoom - 256;
+    const cy = (window.innerHeight / 2 - panning.y) / zoom - 256;
     const asset: Asset = {
       id,
       type: 'image',
-      x: 100 + Math.random() * 200,
-      y: 100 + Math.random() * 200,
+      x: cx,
+      y: cy,
       width: 512,
       height: 512,
       rotation: 0,
@@ -104,20 +109,20 @@ const GenerationPanel: React.FC = () => {
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
-                className="w-full appearance-none bg-white/5 border border-white/10 rounded-xl pl-9 pr-8 py-2.5 text-xs font-semibold text-white outline-none focus:border-purple-500/40 transition-all cursor-pointer"
+                className="w-full appearance-none bg-[#111] border border-white/10 rounded-xl pl-9 pr-8 py-2.5 text-xs font-semibold text-white outline-none focus:border-purple-500/40 transition-all cursor-pointer [&_option]:bg-[#111] [&_option]:text-white [&_optgroup]:bg-[#111] [&_optgroup]:text-white/50"
               >
                 <optgroup label="AI Models">
                   {PRESET_MODELS.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {m.icon} {m.name}
+                      {m.name}
                     </option>
                   ))}
                 </optgroup>
                 {trainedModels.length > 0 && (
-                  <optgroup label="── Your Models ──">
+                  <optgroup label="Your Models">
                     {trainedModels.map((f) => (
                       <option key={f.id} value={f.id}>
-                        🧠 {f.name}
+                        {f.name}
                       </option>
                     ))}
                   </optgroup>

@@ -1,9 +1,26 @@
-import React, { useRef, useEffect } from 'react';
-import { Stage, Layer, Rect, Ellipse, Text, Transformer } from 'react-konva';
+import React, { useRef, useEffect, useCallback } from 'react';
+import { Stage, Layer, Rect, Ellipse, Text, Transformer, Image as KonvaImage } from 'react-konva';
 import Konva from 'konva';
 import { useSceneStore, type Asset } from '../../store/useSceneStore';
 import { useEditorStore } from '../../store/useEditorStore';
 import { useCanvasEvents } from '../../hooks/useCanvasEvents';
+
+// Component to render Image assets using Konva.Image
+const ImageAsset: React.FC<{ asset: Asset; commonProps: Record<string, unknown> }> = ({ asset, commonProps }) => {
+  const [image, setImage] = React.useState<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    if (asset.properties.src) {
+      const img = new window.Image();
+      img.crossOrigin = 'anonymous';
+      img.src = asset.properties.src;
+      img.onload = () => setImage(img);
+    }
+  }, [asset.properties.src]);
+
+  if (!image) return null;
+  return <KonvaImage {...commonProps} image={image} />;
+};
 
 const AssetComponent: React.FC<{ asset: Asset }> = ({ asset }) => {
   const updateAsset = useSceneStore((state) => state.updateAsset);
@@ -11,7 +28,6 @@ const AssetComponent: React.FC<{ asset: Asset }> = ({ asset }) => {
   const setEditingTextId = useEditorStore((state) => state.setEditingTextId);
   const activeTool = useEditorStore((state) => state.activeTool);
   
-  // Track initial drag position for axis locking
   const dragStartPos = useRef({ x: 0, y: 0 });
 
   const commonProps = {
@@ -23,22 +39,17 @@ const AssetComponent: React.FC<{ asset: Asset }> = ({ asset }) => {
     height: asset.height,
     rotation: asset.rotation,
     draggable: !asset.locked && editingTextId !== asset.id,
-    visible: asset.visible && editingTextId !== asset.id, // Hide while editing text
+    visible: asset.visible && editingTextId !== asset.id,
     opacity: (asset.properties.opacity ?? 100) / 100,
     onDragStart: (e: Konva.KonvaEventObject<DragEvent>) => {
       dragStartPos.current = { x: e.target.x(), y: e.target.y() };
     },
     onDragMove: (e: Konva.KonvaEventObject<DragEvent>) => {
-      // Shift + Move: Axis Locking
       if (e.evt && e.evt.shiftKey) {
         const dx = Math.abs(e.target.x() - dragStartPos.current.x);
         const dy = Math.abs(e.target.y() - dragStartPos.current.y);
-        
-        if (dx > dy) {
-          e.target.y(dragStartPos.current.y);
-        } else {
-          e.target.x(dragStartPos.current.x);
-        }
+        if (dx > dy) e.target.y(dragStartPos.current.y);
+        else e.target.x(dragStartPos.current.x);
       }
     },
     onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -57,14 +68,10 @@ const AssetComponent: React.FC<{ asset: Asset }> = ({ asset }) => {
       node.scaleY(1);
     },
     onDblClick: () => {
-      if (asset.type === 'text') {
-        setEditingTextId(asset.id);
-      }
+      if (asset.type === 'text') setEditingTextId(asset.id);
     },
     onClick: () => {
-      if (activeTool === 'text' && asset.type === 'text') {
-        setEditingTextId(asset.id);
-      }
+      if (activeTool === 'text' && asset.type === 'text') setEditingTextId(asset.id);
     }
   };
 
@@ -99,12 +106,14 @@ const AssetComponent: React.FC<{ asset: Asset }> = ({ asset }) => {
           text={asset.properties.text || 'Type...'}
           fontSize={asset.properties.fontSize || 16}
           fontFamily={asset.properties.fontFamily || 'Inter, sans-serif'}
-          fontWeight={asset.properties.fontWeight as any || 'normal'}
+          fontWeight={asset.properties.fontWeight as string || 'normal'}
           fill={asset.properties.fill}
-          align={asset.properties.textAlign as any || 'left'}
+          align={asset.properties.textAlign as string || 'left'}
           lineHeight={asset.properties.lineHeight || 1.2}
         />
       );
+    case 'image':
+      return <ImageAsset asset={asset} commonProps={commonProps} />;
     default:
       return null;
   }
@@ -115,6 +124,7 @@ const KonvaRenderer: React.FC = () => {
   const selectedIds = useSceneStore((state) => state.selectedIds);
   const selectAssets = useSceneStore((state) => state.selectAssets);
   const zoom = useEditorStore((state) => state.zoom);
+  const setZoom = useEditorStore((state) => state.setZoom);
   const panning = useEditorStore((state) => state.panning);
   const setPanning = useEditorStore((state) => state.setPanning);
   const activeTool = useEditorStore((state) => state.activeTool);
@@ -122,8 +132,10 @@ const KonvaRenderer: React.FC = () => {
 
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
+  const isMiddleMousePanning = useRef(false);
+  const lastPointerPos = useRef({ x: 0, y: 0 });
 
-  const { handleMouseDown: onDrawingStart, handleMouseMove, handleMouseUp: onDrawingEnd } = useCanvasEvents(stageRef);
+  const { handleMouseDown: onDrawingStart, handleMouseMove: onDrawingMove, handleMouseUp: onDrawingEnd } = useCanvasEvents(stageRef);
 
   useEffect(() => {
     if (transformerRef.current) {
@@ -136,9 +148,46 @@ const KonvaRenderer: React.FC = () => {
     }
   }, [selectedIds, assets]);
 
-  const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (editingTextId) return; // Don't handle clicks if editing text
+  // ── Scroll to Zoom ──
+  const handleWheel = useCallback((e: Konva.KonvaEventObject<WheelEvent>) => {
+    e.evt.preventDefault();
+    const stage = stageRef.current;
+    if (!stage) return;
 
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+
+    const oldScale = zoom;
+    const scaleBy = 1.08;
+    const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    const clampedScale = Math.max(0.05, Math.min(20, newScale));
+
+    // Zoom toward pointer position
+    const mousePointTo = {
+      x: (pointer.x - panning.x) / oldScale,
+      y: (pointer.y - panning.y) / oldScale,
+    };
+
+    const newPos = {
+      x: pointer.x - mousePointTo.x * clampedScale,
+      y: pointer.y - mousePointTo.y * clampedScale,
+    };
+
+    setZoom(clampedScale);
+    setPanning(newPos);
+  }, [zoom, panning, setZoom, setPanning]);
+
+  // ── Middle Mouse Panning ──
+  const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    // Middle mouse button (button === 1)
+    if (e.evt.button === 1) {
+      e.evt.preventDefault();
+      isMiddleMousePanning.current = true;
+      lastPointerPos.current = { x: e.evt.clientX, y: e.evt.clientY };
+      return;
+    }
+
+    if (editingTextId) return;
     onDrawingStart();
 
     if (activeTool !== 'cursor' && activeTool !== 'pan') return;
@@ -154,6 +203,25 @@ const KonvaRenderer: React.FC = () => {
     }
   };
 
+  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    if (isMiddleMousePanning.current) {
+      const dx = e.evt.clientX - lastPointerPos.current.x;
+      const dy = e.evt.clientY - lastPointerPos.current.y;
+      lastPointerPos.current = { x: e.evt.clientX, y: e.evt.clientY };
+      setPanning({ x: panning.x + dx, y: panning.y + dy });
+      return;
+    }
+    onDrawingMove(e);
+  };
+
+  const handleMouseUp = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    if (e.evt.button === 1 || isMiddleMousePanning.current) {
+      isMiddleMousePanning.current = false;
+      return;
+    }
+    onDrawingEnd();
+  };
+
   return (
     <Stage
       width={window.innerWidth}
@@ -161,7 +229,8 @@ const KonvaRenderer: React.FC = () => {
       ref={stageRef}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
-      onMouseUp={onDrawingEnd}
+      onMouseUp={handleMouseUp}
+      onWheel={handleWheel}
       scaleX={zoom}
       scaleY={zoom}
       x={panning.x}
@@ -190,8 +259,6 @@ const KonvaRenderer: React.FC = () => {
             anchorFill="white"
             rotationSnaps={[0, 45, 90, 135, 180, 225, 270, 315]}
             rotateAnchorOffset={20}
-            // Konva handles Shift key automatically for aspect ratio if properly configured
-            // but we ensure rotation snaps are enabled.
             boundBoxFunc={(oldBox, newBox) => {
               if (newBox.width < 5 || newBox.height < 5) return oldBox;
               return newBox;
