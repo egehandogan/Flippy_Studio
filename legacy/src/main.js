@@ -5,6 +5,8 @@ import { FloatingToolbar } from './toolbar'
 import { LayersPanel } from './layers_panel'
 import { PropertiesPanel } from './properties_panel'
 import { requireAuth } from './auth.js'
+import { AIStudio } from './ai_studio'
+import { BridgeManager } from './bridge_manager'
 
 // Guard: redirect to login if no session
 const session = requireAuth();
@@ -91,6 +93,18 @@ const propertiesPanel = new PropertiesPanel('.properties-panel', sceneGraph, (sa
     engine.draw(sceneGraph);
 });
 
+const aiStudio = new AIStudio(sceneGraph, (img) => {
+    const worldPos = engine.getMouseInWorldSpace(window.innerWidth/2, window.innerHeight/2);
+    const asset = new FlippyAsset('image', worldPos.x - 256, worldPos.y - 256, {
+        width: 512,
+        height: 512,
+        imageElement: img,
+        src: img.src
+    });
+    sceneGraph.addAsset(asset);
+    historyManager.saveState();
+});
+
 historyManager.onStateChange = () => { 
     layersPanel.render(); 
     propertiesPanel.render(); 
@@ -139,12 +153,20 @@ const toolbar = new FloatingToolbar('toolbar-container', (tool) => {
             reader.readAsDataURL(file);
         };
         input.click();
+    } else if (tool === 'ai') {
+        aiStudio.open();
     }
 }, (action) => {
     if (action === 'center' || action === 'reset-zoom') {
         engine.resetTransform();
     }
 });
+
+// Top Bar AI Trigger
+const topBarAiBtn = document.getElementById('make-with-ai-btn');
+if (topBarAiBtn) {
+    topBarAiBtn.onclick = () => aiStudio.open();
+}
 
 // Canvas Interaction Logic
 engine.canvas.addEventListener('mousedown', (e) => {
@@ -420,4 +442,145 @@ window.addEventListener('keydown', (e) => {
 
 engine.resetTransform();
 engine.startRenderLoop(sceneGraph);
+
+// ── Bridge Manager Initialization ─────────────────────────────────────
+
+const bridgeManager = new BridgeManager(sceneGraph);
+const bridgeModal = document.getElementById('bridge-modal');
+const templateModal = document.getElementById('template-picker-modal');
+const pushModal = document.getElementById('push-modal');
+
+// Close modal helper (matches index.html data-target)
+document.querySelectorAll('.close-modal').forEach(btn => {
+    btn.onclick = () => {
+        const target = document.getElementById(btn.dataset.target);
+        if (target) target.style.display = 'none';
+    };
+});
+
+// Engine Card Click Logic
+document.querySelectorAll('.engine-card').forEach(card => {
+    card.onclick = () => {
+        const engineId = card.dataset.engine;
+        
+        // If already connected, open PUSH modal. Otherwise, open CONNECT modal.
+        if (bridgeManager.state.liveSync && bridgeManager.state.connectedEngine === engineId) {
+            pushModal.style.display = 'flex';
+            document.getElementById('push-status-area').innerHTML = '';
+        } else {
+            bridgeManager.state.pendingEngine = engineId;
+            document.getElementById('bridge-modal-body').style.display = 'block';
+            bridgeModal.style.display = 'flex';
+        }
+    };
+});
+
+// 1. Connection Logic
+document.getElementById('btn-bridge-connect').onclick = async () => {
+    const link = document.getElementById('github-link-input').value;
+    const body = document.getElementById('bridge-modal-body');
+    const engineId = bridgeManager.state.pendingEngine;
+
+    // Show Animation
+    const originalContent = body.innerHTML;
+    body.innerHTML = `
+        <div class="bridge-connect-anim">
+            <div class="bridge-orbit"></div>
+            <div style="font-size:14px; font-weight:700; color:white;">Bridging to GitHub...</div>
+            <div style="font-size:11px; color:var(--text-muted);">Syncing repo tree patterns</div>
+        </div>
+    `;
+
+    await bridgeManager.connectBridge(engineId, link);
+    
+    // Switch to Template Picker
+    bridgeModal.style.display = 'none';
+    body.innerHTML = originalContent; // Restore for next time
+    
+    openTemplatePicker();
+};
+
+function openTemplatePicker() {
+    templateModal.style.display = 'flex';
+    document.getElementById('picker-project-name').textContent = `Project: ${bridgeManager.state.projectName}`;
+    
+    const grid = document.getElementById('template-grid');
+    grid.innerHTML = '';
+    
+    bridgeManager.templates.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'template-item';
+        div.innerHTML = `
+            <div class="template-icon">${t.icon}</div>
+            <div class="template-name">${t.name}</div>
+        `;
+        div.onclick = () => div.classList.toggle('selected');
+        div.dataset.id = t.id;
+        grid.appendChild(div);
+    });
+}
+
+// 2. Import Logic
+document.getElementById('btn-import-screens').onclick = () => {
+    const selected = Array.from(document.querySelectorAll('.template-item.selected')).map(el => el.dataset.id);
+    if (selected.length === 0) return;
+
+    const startX = 100;
+    const startY = 100;
+    const spacing = 840; // width (1920/2.5) + some gap
+
+    selected.forEach((tid, i) => {
+        const x = startX + (i * spacing);
+        const y = startY;
+        const frameData = bridgeManager.createAssetsForTemplate(tid, bridgeManager.state.connectedEngine, x, y);
+        
+        // Deserialize and add to scene
+        const frame = FlippyAsset.deserialize(frameData);
+        sceneGraph.addAsset(frame);
+    });
+
+    // Update Live Sync indicator in sidebar
+    const pill = document.querySelector(`#engine-${bridgeManager.state.connectedEngine} .engine-sync-pill`);
+    if (pill) pill.dataset.status = 'on';
+
+    templateModal.style.display = 'none';
+    historyManager.saveState();
+};
+
+// 3. Push Logic
+document.getElementById('btn-confirm-push').onclick = async () => {
+    const statusArea = document.getElementById('push-status-area');
+    const btn = document.getElementById('btn-confirm-push');
+    
+    btn.disabled = true;
+    statusArea.innerHTML = `
+        <div class="push-progress-bar"><div class="push-progress-fill" id="p-fill"></div></div>
+        <div class="push-log-area" id="p-logs">Initializing git push...</div>
+    `;
+
+    const fill = document.getElementById('p-fill');
+    const logs = document.getElementById('p-logs');
+    
+    // Animation simulation
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 2;
+        fill.style.width = `${progress}%`;
+        if (progress === 20) logs.innerHTML += '<br>> delta compression...';
+        if (progress === 40) logs.innerHTML += '<br>> writing objects...';
+        if (progress === 70) logs.innerHTML += '<br>> remote: processing...';
+        if (progress >= 100) clearInterval(interval);
+    }, 50);
+
+    await bridgeManager.pushToGithub();
+    
+    logs.innerHTML += '<br><strong style="color:#BD00FF">> PUSH SUCCESSFUL</strong>';
+    btn.textContent = 'Success!';
+    
+    setTimeout(() => {
+        pushModal.style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = 'Push Changes to GitHub';
+    }, 2000);
+};
 

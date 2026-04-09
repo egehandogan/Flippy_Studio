@@ -406,4 +406,34 @@ export class SceneGraph {
             this.assets = (data.assets || []).map(d => FlippyAsset.deserialize(d));
         }
     }
+
+    alignAssets(type) {
+        const ids = Array.from(this.selectedAssetIds);
+        if (ids.length <= 1) return;
+
+        const assets = ids.map(id => this.assets.find(a => a.id === id)).filter(Boolean);
+        if (assets.length === 0) return;
+
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        assets.forEach(a => {
+            minX = Math.min(minX, a.x);
+            minY = Math.min(minY, a.y);
+            maxX = Math.max(maxX, a.x + a.width);
+            maxY = Math.max(maxY, a.y + a.height);
+        });
+
+        const centerX = minX + (maxX - minX) / 2;
+        const centerY = minY + (maxY - minY) / 2;
+
+        assets.forEach(a => {
+            switch (type) {
+                case 'align-left':     a.x = minX; break;
+                case 'align-h-center': a.x = centerX - a.width / 2; break;
+                case 'align-right':    a.x = maxX - a.width; break;
+                case 'align-top':      a.y = minY; break;
+                case 'align-v-center': a.y = centerY - a.height / 2; break;
+                case 'align-bottom':   a.y = maxY - a.height; break;
+            }
+        });
+    }
 }

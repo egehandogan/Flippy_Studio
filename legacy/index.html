@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/flippy_logo.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flippy Studio | Design-to-Engine</title>
+  <meta name="description" content="Flippy Studio — Professional design-to-game-engine workspace." />
+  <!-- Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <!-- Canvas -->
+    <canvas id="flippy-canvas" tabindex="0"></canvas>
+
+    <!-- ═══════════════════════════════════════════
+         TOP BAR
+    ═══════════════════════════════════════════ -->
+    <header id="top-bar">
+      <!-- Left: Logo + Nav -->
+      <div class="topbar-left">
+        <a class="topbar-brand" href="/launcher.html" title="Back to Launcher">
+          <div class="topbar-logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M8 8l8 4-8 4V8z" fill="white"/>
+            </svg>
+          </div>
+          <span class="topbar-brand-name">Flippy</span>
+        </a>
+        <button class="topbar-menu-btn" id="topbar-menu-btn" title="Menu" aria-label="Open menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Center: Canvas Search -->
+      <div class="topbar-center">
+        <div class="canvas-search" id="canvas-search">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/>
+          </svg>
+          <input type="text" id="canvas-search-input" class="canvas-search-input" placeholder="Search in Canvas" autocomplete="off" />
+          <div class="search-shortcut">
+            <kbd>⌘</kbd><kbd>F</kbd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Actions -->
+      <div class="topbar-right">
+        <div class="auto-save-indicator" id="auto-save-indicator">
+          <div class="save-dot"></div>
+          <span>Auto Save in 5m</span>
+        </div>
+        <button class="make-with-ai-btn" id="make-with-ai-btn" title="Flippy AI Studio">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5z"/>
+            <path d="M19 14l.8 2.8L22.6 17.6l-2.8.8-.8 2.8-.8-2.8-2.8-.8 2.8-.8z"/>
+          </svg>
+          Make with AI
+        </button>
+        <div class="topbar-profile" id="topbar-profile" title="Account">
+          <div class="topbar-avatar" id="topbar-avatar">?</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════
+         LEFT SIDEBAR
+    ═══════════════════════════════════════════ -->
+    <aside id="left-sidebar">
+
+      <!-- Engine Panel -->
+      <div class="panel engine-panel">
+        <div class="panel-header">
+          <span>Game Engine Editor</span>
+        </div>
+        <div class="engine-cards">
+          <!-- Unity -->
+          <div class="engine-card" data-engine="unity" id="engine-unity">
+            <div class="engine-card-top">
+              <div class="engine-sync-pill" data-status="off">
+                <div class="sync-dot"></div>
+                <span>Live Sync</span>
+              </div>
+              <div class="engine-toggle">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </div>
+            </div>
+            <div class="engine-logo-wrap">
+              <img src="/unity_logo.png" alt="Unity" class="engine-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="engine-logo-fallback" style="display:none;">U</div>
+            </div>
+            <div class="engine-name">Unity</div>
+          </div>
+          <!-- Unreal -->
+          <div class="engine-card" data-engine="unreal" id="engine-unreal">
+            <div class="engine-card-top">
+              <div class="engine-sync-pill" data-status="off">
+                <div class="sync-dot"></div>
+                <span>Live Sync</span>
+              </div>
+              <div class="engine-toggle">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </div>
+            </div>
+            <div class="engine-logo-wrap">
+              <img src="/unreal_logo.png" alt="Unreal" class="engine-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="engine-logo-fallback" style="display:none;">U</div>
+            </div>
+            <div class="engine-name">Unreal</div>
+          </div>
+          <!-- Godot -->
+          <div class="engine-card" data-engine="godot" id="engine-godot">
+            <div class="engine-card-top">
+              <div class="engine-sync-pill" data-status="off">
+                <div class="sync-dot"></div>
+                <span>Live Sync</span>
+              </div>
+              <div class="engine-toggle">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </div>
+            </div>
+            <div class="engine-logo-wrap">
+              <img src="/godot_logo.png" alt="Godot" class="engine-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="engine-logo-fallback" style="display:none;">G</div>
+            </div>
+            <div class="engine-name">Godot</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layers Panel -->
+      <div class="panel layers-panel">
+        <div class="panel-header flex-between">
+          <div class="search-box">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/>
+            </svg>
+            <input type="text" placeholder="Layers" class="layer-search" id="layer-search-input"/>
+          </div>
+          <span class="header-actions">
+            <button class="icon-btn-sm" title="Expand all" id="expand-layers-btn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+              </svg>
+            </button>
+            <button class="icon-btn-sm" title="Add layer" id="add-layer-btn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </span>
+        </div>
+        <!-- LayersPanel JS will populate this -->
+      </div>
+
+    </aside>
+
+    <!-- ═══════════════════════════════════════════
+         RIGHT SIDEBAR — Properties
+    ═══════════════════════════════════════════ -->
+    <aside id="right-sidebar">
+      <div class="panel properties-panel"></div>
+    </aside>
+
+    <!-- ═══════════════════════════════════════════
+         FLOATING TOOLBAR
+    ═══════════════════════════════════════════ -->
+    <div id="toolbar-container"></div>
+
+    <!-- ═══════════════════════════════════════════
+         OVERLAY LAYER (marquee, comments, etc.)
+    ═══════════════════════════════════════════ -->
+    <div id="overlay-layer"></div>
+
+    <!-- ═══════════════════════════════════════════
+         ENGINE SYNC MODAL
+    ═══════════════════════════════════════════ -->
+    <div id="engine-sync-modal" class="modal-overlay" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title" id="sync-modal-title">Connect Engine</h2>
+          <button class="modal-close" id="sync-modal-close">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-step">
+            <div class="step-num">1</div>
+            <div class="step-text">Open your game engine project</div>
+          </div>
+          <div class="modal-step">
+            <div class="step-num">2</div>
+            <div class="step-text">Install the <strong>Flippy Plugin</strong> from the Asset Store</div>
+          </div>
+          <div class="modal-step">
+            <div class="step-num">3</div>
+            <div class="step-text">Enter the sync code below in the plugin panel</div>
+          </div>
+          <div class="sync-code-block">
+            <span id="sync-code">FLIP-XXXX-XXXX</span>
+            <button class="copy-code-btn" id="copy-sync-code" title="Copy code">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn-secondary" id="sync-modal-cancel">Cancel</button>
+          <button class="modal-btn-primary" id="sync-modal-confirm">Activate Sync</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Panel Modal -->
+    <div id="ai-panel-modal" class="modal-overlay" style="display:none;">
+      <div class="modal-box" id="ai-studio-modal-box" style="max-width:800px;">
+        <div class="modal-header">
+          <h2 class="modal-title">✦ Flippy AI Studio</h2>
+          <button class="modal-close" id="ai-modal-close">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body" id="ai-studio-content" style="padding:0;">
+            <!-- AIStudio JS will inject content here -->
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /#app -->
+
+  <script type="module" src="/src/main.js"></script>
+  <script type="module">
+    import { requireAuth } from '/src/auth.js';
+    const session = requireAuth();
+    if (session) {
+      // Populate top bar profile
+      const initials = session.name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+      const avatar = document.getElementById('topbar-avatar');
+      if (avatar) { avatar.textContent = initials; avatar.title = session.name; }
+    }
+
+    // Auto-save indicator cycle
+    let saveMin = 5;
+    const saveIndicator = document.querySelector('.auto-save-indicator span');
+    setInterval(() => {
+      saveMin = Math.max(1, saveMin - 1);
+      if (saveIndicator) saveIndicator.textContent = saveMin <= 1 ? 'Saving…' : `Auto Save in ${saveMin}m`;
+      if (saveMin <= 1) {
+        const dot = document.querySelector('.save-dot');
+        if (dot) dot.classList.add('saving');
+        setTimeout(() => {
+          saveMin = 5;
+          if (saveIndicator) saveIndicator.textContent = 'Auto Save in 5m';
+          if (dot) dot.classList.remove('saving');
+        }, 1500);
+      }
+    }, 60000);
+
+    // Engine Sync toggles
+    document.querySelectorAll('.engine-card').forEach(card => {
+      const toggle = card.querySelector('.toggle-track');
+      const pill = card.querySelector('.engine-sync-pill');
+      const dot = card.querySelector('.sync-dot');
+      let active = false;
+
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.engine-toggle')) {
+          active = !active;
+          card.classList.toggle('synced', active);
+          toggle.classList.toggle('on', active);
+          pill.dataset.status = active ? 'on' : 'off';
+          dot.classList.toggle('active', active);
+          return;
+        }
+        // Open modal
+        const engine = card.dataset.engine;
+        const modal = document.getElementById('engine-sync-modal');
+        const code = 'FLIP-' + Math.random().toString(36).substring(2,6).toUpperCase() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
+        document.getElementById('sync-modal-title').textContent = `Connect to ${engine.charAt(0).toUpperCase() + engine.slice(1)}`;
+        document.getElementById('sync-code').textContent = code;
+        modal.style.display = 'flex';
+      });
+    });
+
+    const syncModal = document.getElementById('engine-sync-modal');
+    document.getElementById('sync-modal-close').onclick = () => syncModal.style.display = 'none';
+    document.getElementById('sync-modal-cancel').onclick = () => syncModal.style.display = 'none';
+    document.getElementById('sync-modal-confirm').onclick = () => {
+      syncModal.style.display = 'none';
+    };
+    document.getElementById('copy-sync-code').onclick = () => {
+      const code = document.getElementById('sync-code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = document.getElementById('copy-sync-code');
+        btn.style.color = '#10B981';
+        setTimeout(() => btn.style.color = '', 1500);
+      });
+    };
+    syncModal.addEventListener('click', (e) => { if (e.target === syncModal) syncModal.style.display = 'none'; });
+
+
+
+    // Canvas Search keyboard shortcut
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        document.getElementById('canvas-search-input').focus();
+      }
+      if (e.key === 'Escape') {
+        const input = document.getElementById('canvas-search-input');
+        if (document.activeElement === input) input.blur();
+      }
+    });
+  </script>
+
+  <!-- ==========================================
+       BRIDGE & SYNC MODALS
+       ========================================== -->
+
+  <!-- Bridge Connect Modal -->
+  <div class="modal-overlay" id="bridge-modal">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <div class="modal-title">Bridge Connect</div>
+        <button class="icon-btn-sm close-modal" data-target="bridge-modal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-content" id="bridge-modal-body">
+        <div class="ai-field-group">
+            <label class="ai-field-label">GitHub Repository URL</label>
+            <input type="text" class="ai-input" id="github-link-input" placeholder="https://github.com/username/repo">
+            <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">Securely sync your design frames with game engine source files.</div>
+        </div>
+        <button class="ai-btn-primary" id="btn-bridge-connect" style="width:100%; margin-top:20px;">Connect & Authorize</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Template Picker Modal -->
+  <div class="modal-overlay" id="template-picker-modal">
+    <div class="modal-box" style="max-width: 720px;">
+      <div class="modal-header">
+        <div class="modal-title" id="picker-project-name">Project: Loading...</div>
+        <button class="icon-btn-sm close-modal" data-target="template-picker-modal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-content" style="padding-top:10px;">
+        <div style="margin-bottom:16px; font-size:12px; color:var(--text-secondary);">Select UI screens to import as editable wireframes (CoD Style):</div>
+        <div class="bridge-template-grid" id="template-grid">
+            <!-- Templates injected -->
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+            <button class="ai-btn-primary" id="btn-import-screens" style="background:#0094FF; box-shadow:0 4px 15px rgba(0, 148, 255, 0.3);">Import to Canvas</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Push Modal -->
+  <div class="modal-overlay" id="push-modal">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title">Sync to Engine Source</div>
+        <button class="icon-btn-sm close-modal" data-target="push-modal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-content" id="push-modal-body">
+        <div class="ai-field-group">
+            <label class="ai-field-label">Commit Message</label>
+            <input type="text" class="ai-input" id="push-message" value="feat: update game UI wireframes from Flippy">
+        </div>
+        <div id="push-status-area"></div>
+        <button class="ai-btn-primary" id="btn-confirm-push" style="width:100%; margin-top:20px;">Push Changes to GitHub</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,45 +1,57 @@
-# Flippy Studio: Design-to-Engine Workspace
+# 🎨 Flippy Studio
 
-Flippy Studio is a highly interactive, "Design-to-Engine" workspace built specifically to bridge the gap between UI/UX design and game engines (Unity, Unreal, Godot). With a premium dark aesthetic and dynamic canvas engine, it seeks to deliver a zero-friction translation from visual logic to code implementations.
+Flippy Studio, oyun geliştiricileri ve UI/UX tasarımcıları için geliştirilmiş, **AI destekli** ve **premium** bir tasarım editörüdür. Modern web teknolojileriyle inşa edilen bu araç, fikirlerinizi anında dijital varlıklara dönüştürmenize yardımcı olur.
 
-## 🚀 Core Features (V1 Beta)
+[![Deploy with Vercel](https://vercel.com/button)](https://flippy-studio.vercel.app)
 
-### 🎨 Rendering & Environment
-- **Infinite Dot Canvas**: High-performance HTML5 Canvas rendering loop with dynamic grid scaling, zooming, and panning logic.
-- **Glassmorphism UI**: High aesthetic standard using deep blurs, tailored translucent blacks, and modern typography (`Inter`, `Outfit`).
-- **Premium Editor Layout**: A fully structured workspace featuring Left Sidebars (Game Engine Integrations, Layers) and a Right Sidebar (Properties Inspector).
+## ✨ Temel Özellikler
 
-### 🛠️ Advanced Tooling & Interaction
-- **Porta-Toolbar**: A fully draggable, perfectly stable floating glassmorphism toolbar holding all primary tools.
-- **Scene Graph System**: Robust tracking of all design assets (`FlippyAsset`).
-- **Transformation Engine**:
-   - Single-select and Multi-select (via `Shift` or Marquee dragging).
-   - Moving, proportional Scaling, and smooth corner-pivot Rotation.
-   - Rotation handles feature "Magnetic Hit-Testing", working precisely in the 5px-40px zone *outside* an object's boundary.
-- **History Management (`Ctrl+Z`)**: 50-step state-snapshot system preventing data loss.
-- **Clipboard Management (`Ctrl+C` / `Ctrl+V`)**: Deep serialization allowing copying and pasting. Pasted assets use iterative positioning offsets mimicking professional standards.
+- **🤖 AI Asset Generator**: Hugging Face (Stable Diffusion) entegrasyonu ile metinden tasarım varlıkları üretin.
+- **📐 Gelişmiş Vektör Editörü**: Kare, daire, dikdörtgen ve serbest çizim (Pen Tool) araçları.
+- **🏗️ 3D Guide System**: Küp ve Küre projeksiyon rehberleri ile tasarımınıza derinlik katın.
+- **⚡ Pro-Toolbar**: Serbestçe sürüklenebilir, genişletilebilir ve tüm tasarım araçlarını barındıran akıllı araç çubuğu.
+- **💎 Premium UI/UX**: Glassmorphism etkileri, modern karanlık tema ve akıcı geçişler.
+- **⚙️ Real-time Properties**: Figma benzeri sağ panel ile objelerin özelliklerini anlık olarak düzenleyin.
+- **🔗 Engine Bridge**: Unity, Unreal Engine ve Godot projeleriyle senkronizasyon altyapısı.
 
-### 🎮 Live Engine Sync (Upcoming)
-The interface is pre-configured with a "Game Engine Editor" panel to stream logic, coordinates, and assets live to Unity, Unreal, and Godot using WebSockets.
+## 🚀 Teknoloji Yığını
 
----
+- **Framework**: [React 19](https://react.dev/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **TypeScript**: Tam tip güvenliği ve sağlam mimari.
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Auth**: [Clerk](https://clerk.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Canvas Engine**: Özel yapım Singleton & Observable bazlı sahne yönetim sistemi.
 
-## 🛠️ Stack & Technologies
-- **Environment**: Vite + Vanilla JavaScript / CSS. No heavy frontend frameworks, relying purely on HTML5 capabilities for extreme speed.
-- **Hosting**: Connected to GitHub, auto-deployed via Vercel.
+## 🛠️ Kurulum ve Çalıştırma
 
-## 📦 Running Locally
-1. Clone the repository.
+Projeyi yerel ortamınızda çalıştırmak için:
+
+1. Depoyu klonlayın:
    ```bash
-   git clone git@github.com:egehandogan/Flippy_Studio.git
+   git clone https://github.com/egehandogan/Flippy_Studio.git
    ```
-2. Install dependencies:
+
+2. Bağımlılıkları yükleyin:
    ```bash
    npm install
    ```
-3. Run the development server:
+
+3. Çevre değişkenlerini (`.env`) ayarlayın:
+   ```env
+   VITE_CLERK_PUBLISHABLE_KEY=your_key
+   VITE_HF_API_KEY=your_hf_key
+   ```
+
+4. Geliştirme sunucusunu başlatın:
    ```bash
    npm run dev
    ```
 
-*Document architecture automatically generated and maintained by the Flippy AI Copilot system.*
+## 🌐 Canlı Önizleme
+
+Projeye şu adresten ulaşabilirsiniz: [https://flippy-studio.vercel.app](https://flippy-studio.vercel.app)
+
+---
+Developed with ❤️ by **Antigravity AI**

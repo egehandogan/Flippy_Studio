@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --flippy-bg: #000000;
+    --flippy-panel: #080808;
+    --flippy-panel-light: #121212;
+    --flippy-border: rgba(255, 255, 255, 0.08);
+    --flippy-blue: #0094FF;
+    --flippy-purple: #BD00FF;
+    --text-main: rgba(255, 255, 255, 0.9);
+    --text-muted: rgba(255, 255, 255, 0.4);
+  }
+
+  body {
+    @apply bg-flippy-bg text-white antialiased overflow-hidden font-sans;
+  }
+}
+
+@layer components {
+  .flippy-glass {
+    @apply bg-flippy-panel/80 backdrop-blur-xl border border-flippy-border;
+  }
+  
+  .flippy-card {
+    @apply bg-flippy-panel border border-flippy-border rounded-3xl p-6 transition-all hover:bg-white/5;
+  }
+
+  .flippy-button-primary {
+    @apply px-4 py-2 bg-flippy-blue text-white rounded-xl font-bold transition-all active:scale-95 shadow-[0_0_20px_-5px_rgba(0,148,255,0.4)];
+  }
+
+  .flippy-button-secondary {
+    @apply px-4 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl font-bold transition-all;
+  }
+
+  .cl-rootBox {
+    @apply flex items-center justify-center;
+  }
+  
+  .cl-card {
+    @apply bg-flippy-panel border border-flippy-border !important;
+  }
+}
+
+::-webkit-scrollbar {
+  @apply w-1.5 h-1.5;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full hover:bg-white/20;
+}
