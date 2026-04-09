@@ -126,7 +126,7 @@ const Toolbar: React.FC = () => {
     <motion.div 
       drag
       dragMomentum={false}
-      className="flex items-center gap-1.5 p-1.5 bg-[#0D0D0D]/90 backdrop-blur-2xl border border-white/10 rounded-[20px] shadow-2xl z-50 select-none cursor-default"
+      className="flex items-center gap-1.5 p-1.5 flippy-glass rounded-[20px] shadow-2xl z-50 select-none cursor-default"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >

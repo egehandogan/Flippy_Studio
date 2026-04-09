@@ -85,7 +85,7 @@ const RightSidebar: React.FC = () => {
   };
 
   return (
-    <aside className="w-64 border-l border-white/5 bg-[#0D0D0D] flex flex-col overflow-y-auto custom-scrollbar">
+    <aside className="w-64 flippy-glass flex flex-col overflow-y-auto custom-scrollbar">
       {/* Selection Header */}
       <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
         <div className="flex items-center gap-2">

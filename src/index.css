@@ -21,7 +21,7 @@
 
 @layer components {
   .flippy-glass {
-    @apply bg-flippy-panel/80 backdrop-blur-xl border border-flippy-border;
+    @apply bg-black/50 backdrop-blur-2xl border border-white/5 shadow-2xl;
   }
   
   .flippy-card {

@@ -155,9 +155,9 @@ const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
   const rootAssets = assets.filter(a => a.parentId === null);
 
   return (
-    <aside className="w-72 bg-black border-r border-white/5 flex flex-col overflow-hidden z-40">
+    <aside className="w-72 flippy-glass flex flex-col overflow-hidden z-40">
       {/* Game Engine Editor Section */}
-      <div className="p-4 border-b border-white/5 bg-white/[0.01]">
+      <div className="p-4 border-b border-white/5 bg-white/[0.03]">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em] pl-1">Game Engine Editor</h3>
           <Settings2 size={12} className="text-white/20 cursor-pointer hover:text-white transition-colors" />

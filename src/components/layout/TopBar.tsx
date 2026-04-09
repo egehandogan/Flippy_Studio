@@ -11,7 +11,7 @@ const TopBar: React.FC = () => {
 
   return (
     <>
-      <header className="h-14 border-b border-white/[0.08] bg-black flex items-center justify-between px-4 z-50 select-none">
+      <header className="h-14 border-b border-white/[0.08] flippy-glass flex items-center justify-between px-4 z-50 select-none">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-1">
             <div className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-xl border border-white/10 shadow-xl overflow-hidden">
