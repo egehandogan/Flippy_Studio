@@ -10,10 +10,7 @@ import {
   Unlock, 
   ChevronDown, 
   Maximize, 
-  Settings2,
-  Box,
-  Monitor,
-  Cpu
+  Settings2
 } from 'lucide-react';
 
 const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
@@ -21,9 +18,9 @@ const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
   const bridge = bridgeService.state;
 
   const engines = [
-    { id: 'unity', name: 'Unity', icon: <Box size={20} /> },
-    { id: 'unreal', name: 'Unreal', icon: <Monitor size={20} /> },
-    { id: 'godot', name: 'Godot', icon: <Cpu size={20} /> },
+    { id: 'unity', name: 'Unity', icon: <img src="/unity_logo.png" className="w-5 h-5 object-contain" alt="Unity" /> },
+    { id: 'unreal', name: 'Unreal', icon: <img src="/unreal_logo.png" className="w-5 h-5 object-contain" alt="Unreal" /> },
+    { id: 'godot', name: 'Godot', icon: <img src="/godot_logo.png" className="w-5 h-5 object-contain" alt="Godot" /> },
   ];
 
   const handleEngineClick = (id: string) => {

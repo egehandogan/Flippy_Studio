@@ -46,10 +46,8 @@ const TopBar: React.FC<TopBarProps> = () => {
       {/* Left Section: Logo */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 px-1">
-          <div className="w-8 h-8 flex items-center justify-center bg-white rounded-xl shadow-[0_0_15px_-3px_rgba(255,255,255,0.3)]">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7 6C5.34315 6 4 7.34315 4 9V15C4 16.6569 5.34315 18 7 18H17C18.6569 18 20 16.6569 20 15V13H15V15H7V9H18V6H7Z" fill="black"/>
-            </svg>
+          <div className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-xl border border-white/10 shadow-xl overflow-hidden">
+            <img src="/favicon.svg" alt="Flippy Logo" className="w-5 h-5 object-contain" />
           </div>
           <span className="text-[15px] font-black tracking-tighter text-white">Flippy</span>
         </div>

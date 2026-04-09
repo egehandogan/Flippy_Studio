@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Plus, 
   MousePointer2, 
@@ -21,10 +21,7 @@ import { FlippyAsset, sceneGraph } from '../../core/SceneGraph';
 
 const Toolbar: React.FC = () => {
   const { activeTool, setTool, zoom } = useEditorState();
-  const [position, setPosition] = useState({ x: window.innerWidth / 2 - 300, y: window.innerHeight - 80 });
-  const [isDragging, setIsDragging] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
-  const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const tools: { id: ToolType; icon: React.ReactNode; label: string }[] = [
@@ -39,44 +36,6 @@ const Toolbar: React.FC = () => {
     { id: 'pan', icon: <Hand size={18} />, label: 'Pan' },
     { id: 'comment', icon: <MessageSquare size={18} />, label: 'Comment' },
   ];
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.tool-btn')) return;
-    setIsDragging(true);
-    dragRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      startPosX: position.x,
-      startPosY: position.y
-    };
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging && dragRef.current) {
-        const dx = e.clientX - dragRef.current.startX;
-        const dy = e.clientY - dragRef.current.startY;
-        setPosition({
-          x: dragRef.current.startPosX + dx,
-          y: dragRef.current.startPosY + dy
-        });
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -110,11 +69,7 @@ const Toolbar: React.FC = () => {
   };
 
   return (
-    <div 
-      className="fixed flex items-center gap-1 p-1.5 bg-[#0D0D0D]/80 backdrop-blur-2xl border border-white/10 rounded-[20px] shadow-2xl z-[100] transition-shadow select-none"
-      style={{ left: position.x, top: position.y }}
-      onMouseDown={handleMouseDown}
-    >
+    <div className="flex items-center gap-1 p-1.5 bg-[#0D0D0D]/80 backdrop-blur-2xl border border-white/10 rounded-[24px] shadow-2xl z-50 select-none animate-in fade-in slide-in-from-bottom-4 duration-500">
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -123,8 +78,8 @@ const Toolbar: React.FC = () => {
         onChange={handleFileChange}
       />
 
-      {/* Drag Handle */}
-      <div className="w-6 h-10 flex items-center justify-center cursor-grab active:cursor-grabbing text-white/20 hover:text-white/40 border-r border-white/5 mr-1">
+      {/* Drag Handle (Visual only now, positioning is layout-driven) */}
+      <div className="w-6 h-10 flex items-center justify-center cursor-default text-white/20 border-r border-white/5 mr-1">
         <GripVertical size={14} />
       </div>
 
