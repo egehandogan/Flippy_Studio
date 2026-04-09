@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useSceneStore } from '../../store/useSceneStore';
 import TopBar from './TopBar';
 import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';

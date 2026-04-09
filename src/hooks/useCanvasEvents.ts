@@ -25,7 +25,7 @@ export const useCanvasEvents = (stageRef: React.RefObject<Konva.Stage | null>) =
     };
   }, [stageRef]);
 
-  const handleMouseDown = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
+  const handleMouseDown = useCallback(() => {
     if (activeTool === 'cursor' || activeTool === 'pan') return;
 
     const pos = getRelativePointerPosition();
@@ -38,7 +38,7 @@ export const useCanvasEvents = (stageRef: React.RefObject<Konva.Stage | null>) =
       
       const newAsset: Asset = {
         id,
-        type: activeTool as any,
+        type: (activeTool === 'rect' || activeTool === 'circle' || activeTool === 'text') ? activeTool : 'rect',
         x: pos.x,
         y: pos.y,
         width: 5,
@@ -63,7 +63,7 @@ export const useCanvasEvents = (stageRef: React.RefObject<Konva.Stage | null>) =
     }
   }, [activeTool, addAsset, selectAssets, getRelativePointerPosition]);
 
-  const handleMouseMove = useCallback((_e: Konva.KonvaEventObject<MouseEvent>) => {
+  const handleMouseMove = useCallback(() => {
     if (!isDrawing.current || !currentAssetId.current) return;
 
     const pos = getRelativePointerPosition();

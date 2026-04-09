@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../shared/Modal';
 import { useBridge } from '../../hooks/useBridge';
-import { sceneGraph, FlippyAsset } from '../../core/SceneGraph';
+import { useSceneStore, type Asset } from '../../store/useSceneStore';
 import { Check, Import } from 'lucide-react';
 
 const TemplatePickerModal: React.FC = () => {
   const { connectedEngine, templates, projectName } = useBridge();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  
+  const addAsset = useSceneStore((state) => state.addAsset);
 
-  // Show if connected but not yet imported (simplified logic for demo)
   const [isOpen, setIsOpen] = useState(false);
   const [hasShownOnce, setHasShownOnce] = useState(false);
 
-  // Sync state with bridgeService connectivity (manual trigger for demo)
   useEffect(() => {
     if (connectedEngine && !hasShownOnce) {
        setIsOpen(true);
@@ -34,17 +34,31 @@ const TemplatePickerModal: React.FC = () => {
     const spacing = 840;
 
     Array.from(selectedIds).forEach((tid, i) => {
-      // Logic from legacy/src/bridge_manager.js (simplified here)
-      const asset = new FlippyAsset('frame', startX + (i * spacing), 100, {
-        name: `${tid.replace('t-', '').toUpperCase()} SCREEN`,
+      const id = crypto.randomUUID();
+      const newAsset: Asset = {
+        id,
+        type: 'rect',
+        x: startX + (i * spacing),
+        y: 100,
         width: 1920 / 2.5,
         height: 1080 / 2.5,
-      });
-      sceneGraph.addAsset(asset);
+        rotation: 0,
+        name: `${tid.replace('t-', '').toUpperCase()} SCREEN`,
+        visible: true,
+        locked: false,
+        parentId: null,
+        properties: {
+          fill: '#0A0A0A',
+          stroke: '#333333',
+          strokeWidth: 2,
+          opacity: 100,
+          cornerRadius: 20
+        }
+      };
+      addAsset(newAsset);
     });
 
     setIsOpen(false);
-    sceneGraph.notify();
   };
 
   return (

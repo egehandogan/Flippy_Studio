@@ -101,7 +101,7 @@ const KonvaRenderer: React.FC = () => {
   }, [selectedIds, assets]);
 
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    onDrawingStart(e);
+    onDrawingStart();
 
     if (activeTool !== 'cursor' && activeTool !== 'pan') return;
 
