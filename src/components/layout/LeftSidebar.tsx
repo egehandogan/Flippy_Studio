@@ -1,5 +1,5 @@
-import React from 'react';
-import { useSceneStore } from '../../store/useSceneStore';
+import React, { useState } from 'react';
+import { useSceneStore, type Asset } from '../../store/useSceneStore';
 import { bridgeService } from '../../services/BridgeService';
 import { 
   Search, 
@@ -9,9 +9,114 @@ import {
   Lock, 
   Unlock, 
   ChevronDown, 
+  ChevronRight,
   Maximize, 
-  Settings2
+  Settings2,
+  Square,
+  Circle as CircleIcon,
+  Type,
+  Image as ImageIcon
 } from 'lucide-react';
+
+const AssetIcon = ({ type }: { type: Asset['type'] }) => {
+  switch (type) {
+    case 'rect': return <Square size={12} className="opacity-40" />;
+    case 'circle': return <CircleIcon size={12} className="opacity-40" />;
+    case 'text': return <Type size={12} className="opacity-40" />;
+    case 'image': return <ImageIcon size={12} className="opacity-40" />;
+    case 'frame': return <LayersIcon size={12} className="text-flippy-blue opacity-60" />;
+    default: return <Square size={12} className="opacity-40" />;
+  }
+};
+
+const LayerItem: React.FC<{
+  asset: Asset;
+  level: number;
+  expandedIds: string[];
+  toggleExpand: (id: string) => void;
+  selectedIds: string[];
+  selectAssets: (ids: string[]) => void;
+  updateAsset: (id: string, props: Partial<Asset>) => void;
+  allAssets: Asset[];
+}> = ({ asset, level, expandedIds, toggleExpand, selectedIds, selectAssets, updateAsset, allAssets }) => {
+  const isExpanded = expandedIds.includes(asset.id);
+  const children = allAssets.filter(a => a.parentId === asset.id);
+  const hasChildren = children.length > 0;
+  const isSelected = selectedIds.includes(asset.id);
+
+  return (
+    <>
+      <div 
+        onClick={(e) => {
+          e.stopPropagation();
+          selectAssets([asset.id]);
+        }}
+        className={`group flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all mb-0.5 ${
+          isSelected 
+            ? 'bg-flippy-blue/[0.12] text-flippy-blue' 
+            : 'text-white/40 hover:bg-white/[0.04] hover:text-white/80'
+        }`}
+        style={{ paddingLeft: `${(level * 16) + 8}px` }}
+      >
+        <div 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (hasChildren) toggleExpand(asset.id);
+          }}
+          className="w-4 h-4 flex items-center justify-center hover:bg-white/5 rounded transition-colors"
+        >
+          {hasChildren ? (
+            isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />
+          ) : null}
+        </div>
+        
+        <AssetIcon type={asset.type} />
+        <span className={`flex-1 text-[11px] truncate tracking-tight ${isSelected ? 'font-bold' : 'font-medium'}`}>
+          {asset.name}
+        </span>
+        
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              updateAsset(asset.id, { visible: !asset.visible });
+            }}
+            className="p-1 hover:bg-white/5 rounded-md transition-colors"
+          >
+            {asset.visible ? <Eye size={10} /> : <EyeOff size={10} />}
+          </button>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              updateAsset(asset.id, { locked: !asset.locked });
+            }}
+            className="p-1 hover:bg-white/5 rounded-md transition-colors"
+          >
+            {asset.locked ? <Lock size={10} /> : <Unlock size={10} />}
+          </button>
+        </div>
+      </div>
+
+      {hasChildren && isExpanded && (
+        <div className="flex flex-col">
+          {children.slice().reverse().map(child => (
+            <LayerItem 
+              key={child.id}
+              asset={child}
+              level={level + 1}
+              expandedIds={expandedIds}
+              toggleExpand={toggleExpand}
+              selectedIds={selectedIds}
+              selectAssets={selectAssets}
+              updateAsset={updateAsset}
+              allAssets={allAssets}
+            />
+          ))}
+        </div>
+      )}
+    </>
+  );
+};
 
 const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
   const assets = useSceneStore((state) => state.assets);
@@ -19,6 +124,17 @@ const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
   const updateAsset = useSceneStore((state) => state.updateAsset);
   const selectAssets = useSceneStore((state) => state.selectAssets);
   
+  // Track expanded frames/groups - default frames expanded
+  const [expandedIds, setExpandedIds] = useState<string[]>(
+    assets.filter(a => a.type === 'frame').map(a => a.id)
+  );
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
   const bridge = bridgeService.state;
 
   const engines = [
@@ -34,6 +150,9 @@ const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
       bridgeService.setPendingEngine(id as any);
     }
   };
+
+  // Only top-level assets for the main recursive call
+  const rootAssets = assets.filter(a => a.parentId === null);
 
   return (
     <aside className="w-72 bg-black border-r border-white/5 flex flex-col overflow-hidden z-40">
@@ -96,41 +215,18 @@ const LeftSidebar: React.FC<{ onOpenPush: () => void }> = ({ onOpenPush }) => {
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar px-2 pb-4">
-          {assets.slice().reverse().map((asset) => (
-            <div 
+          {rootAssets.slice().reverse().map((asset) => (
+            <LayerItem 
               key={asset.id}
-              onClick={() => selectAssets([asset.id])}
-              className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all mb-0.5 ${
-                selectedIds.includes(asset.id) 
-                  ? 'bg-flippy-blue/[0.12] text-flippy-blue' 
-                  : 'text-white/40 hover:bg-white/[0.04] hover:text-white/80'
-              }`}
-            >
-              <ChevronDown size={14} className={`transition-transform grow-0 shrink-0 ${asset.parentId ? 'opacity-0' : 'opacity-40'}`} />
-              <LayersIcon size={14} className="shrink-0 opacity-40" />
-              <span className="flex-1 text-[11px] font-bold truncate tracking-tight">{asset.name}</span>
-              
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    updateAsset(asset.id, { visible: !asset.visible });
-                  }}
-                  className="p-1 hover:bg-white/5 rounded-lg transition-colors"
-                >
-                  {asset.visible ? <Eye size={12} /> : <EyeOff size={12} />}
-                </button>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    updateAsset(asset.id, { locked: !asset.locked });
-                  }}
-                  className="p-1 hover:bg-white/5 rounded-lg transition-colors"
-                >
-                  {asset.locked ? <Lock size={12} /> : <Unlock size={12} />}
-                </button>
-              </div>
-            </div>
+              asset={asset}
+              level={0}
+              expandedIds={expandedIds}
+              toggleExpand={toggleExpand}
+              selectedIds={selectedIds}
+              selectAssets={selectAssets}
+              updateAsset={updateAsset}
+              allAssets={assets}
+            />
           ))}
 
           {assets.length === 0 && (

@@ -41,9 +41,11 @@ const AssetComponent: React.FC<{ asset: Asset; childrenAssets?: Asset[] }> = ({ 
     visible: asset.visible && editingTextId !== asset.id,
     opacity: (asset.properties.opacity ?? 100) / 100,
     onDragStart: (e: Konva.KonvaEventObject<DragEvent>) => {
+      e.cancelBubble = true;
       dragStartPos.current = { x: e.target.x(), y: e.target.y() };
     },
     onDragMove: (e: Konva.KonvaEventObject<DragEvent>) => {
+      e.cancelBubble = true;
       if (e.evt && e.evt.shiftKey) {
         const dx = Math.abs(e.target.x() - dragStartPos.current.x);
         const dy = Math.abs(e.target.y() - dragStartPos.current.y);
@@ -52,6 +54,7 @@ const AssetComponent: React.FC<{ asset: Asset; childrenAssets?: Asset[] }> = ({ 
       }
     },
     onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => {
+      e.cancelBubble = true;
       updateAsset(asset.id, { x: e.target.x(), y: e.target.y() });
     },
     onTransformEnd: (e: Konva.KonvaEventObject<Event>) => {
@@ -102,7 +105,11 @@ const AssetComponent: React.FC<{ asset: Asset; childrenAssets?: Asset[] }> = ({ 
             fontSize={10} 
             fill="#FFFFFF40" 
             fontStyle="bold"
-            listening={false}
+            listening={true}
+            onDblClick={(e) => {
+               e.cancelBubble = true;
+               setEditingTextId(asset.id);
+            }}
           />
           {/* Children Assets */}
           {childrenAssets.map(child => (
@@ -140,9 +147,9 @@ const AssetComponent: React.FC<{ asset: Asset; childrenAssets?: Asset[] }> = ({ 
           text={asset.properties.text || 'Type...'}
           fontSize={asset.properties.fontSize || 16}
           fontFamily={asset.properties.fontFamily || 'Inter, sans-serif'}
-          fontWeight={asset.properties.fontWeight as any || 'normal'}
+          fontWeight={asset.properties.fontWeight as 'normal' | 'bold' | '500' | '600' | '700' || 'normal'}
           fill={asset.properties.fill}
-          align={asset.properties.textAlign as any || 'left'}
+          align={asset.properties.textAlign as 'left' | 'center' | 'right' || 'left'}
           lineHeight={asset.properties.lineHeight || 1.2}
         />
       );
@@ -163,6 +170,7 @@ const KonvaRenderer: React.FC = () => {
   const setPanning = useEditorStore((state) => state.setPanning);
   const activeTool = useEditorStore((state) => state.activeTool);
   const editingTextId = useEditorStore((state) => state.editingTextId);
+  const setEditingTextId = useEditorStore((state) => state.setEditingTextId);
 
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -307,6 +315,36 @@ const KonvaRenderer: React.FC = () => {
           />
         )}
       </Layer>
+      
+      {/* Inline Rename Overlay for Frames */}
+      {editingTextId && assets.find(a => a.id === editingTextId)?.type === 'frame' && (
+        <div 
+          className="absolute z-50 p-2"
+          style={{
+            left: (assets.find(a => a.id === editingTextId)!.x * zoom) + panning.x,
+            top: (assets.find(a => a.id === editingTextId)!.y * zoom) + panning.y - 40,
+          }}
+        >
+          <input
+            autoFocus
+            className="bg-[#0A0A0A] border border-flippy-blue text-white text-[11px] font-bold px-2 py-1 rounded outline-none shadow-2xl"
+            defaultValue={assets.find(a => a.id === editingTextId)!.name}
+            onBlur={(e) => {
+              const name = e.target.value;
+              if (name) useSceneStore.getState().updateAsset(editingTextId, { name: name.toUpperCase() });
+              setEditingTextId(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const name = (e.target as HTMLInputElement).value;
+                if (name) useSceneStore.getState().updateAsset(editingTextId, { name: name.toUpperCase() });
+                setEditingTextId(null);
+              }
+              if (e.key === 'Escape') setEditingTextId(null);
+            }}
+          />
+        </div>
+      )}
     </Stage>
   );
 };
