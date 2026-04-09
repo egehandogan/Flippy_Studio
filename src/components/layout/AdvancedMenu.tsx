@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useSceneStore } from '../../store/useSceneStore';
 import { useEditorStore } from '../../store/useEditorStore';
+import SettingsModal from '../modals/SettingsModal';
 
 interface MenuItem {
   id: string;
@@ -18,6 +19,7 @@ interface MenuItem {
 const AdvancedMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Store access
@@ -47,7 +49,7 @@ const AdvancedMenu: React.FC = () => {
         { id: 'f-save', label: 'Save Project', shortcut: 'Ctrl+S', action: () => alert('Project saved to local storage!') },
         { id: 'f-export-json', label: 'Export as JSON', action: handleExportJSON },
         { id: 'f-export-png', label: 'Export as PNG', action: () => alert('PNG Export started...') },
-        { id: 'f-settings', label: 'Settings', shortcut: 'Ctrl+,', action: () => {} },
+        { id: 'f-settings', label: 'Settings', shortcut: 'Ctrl+,', action: () => setIsSettingsOpen(true) },
       ]
     },
     {
@@ -191,6 +193,8 @@ const AdvancedMenu: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
   );
 };
